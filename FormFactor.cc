@@ -1,0 +1,175 @@
+#include "FormFactor.h"
+
+#include <cstdlib>
+#include <ctime>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <math.h>
+
+
+///////
+
+void Helm::Setsval(double s) {
+
+  sval = s;
+
+}
+
+double Helm::Getsval() { return sval;}
+
+
+double Helm::FFval(double Q) 
+{
+  double ff = 1;
+  double R = 1.14*pow(A,1./3.);
+  double Rnorig = sqrt(3./5.*pow(R,2)+3*sval*sval);
+  double Rmod = sqrt(5./3.*(pow(Rnorig*Rnfac,2)-3*sval*sval));
+  double qR = Q*Rmod;
+    //    double qR = Q*R;
+  
+  ff= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*exp(-1.*Q*Q*sval*sval);
+  if (isnan(ff)) {ff=1.;}
+    
+  return ff;
+
+}
+
+////
+
+
+void Klein::Setakval(double ak) {
+
+  akval = ak;
+
+}
+
+double Klein::Getakval() { return akval;}
+
+
+double Klein::FFval(double Q) 
+{
+ 
+  double ff = 1;
+
+  //  double R2 = 1.14*pow(A,1./3.);
+  double R2 = 1.2*pow(A,1./3.);
+  double qR = Q*R2;
+  ff= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*pow(1./(1+akval*akval*Q*Q),2);
+
+    
+  if (isnan(ff)) {ff=1.;}
+
+  return ff;
+
+
+}
+
+/////////
+
+void Horowitz::ReadFFfile()
+{
+
+  double q,ff;
+  std::ifstream fffile;
+  std::string fffilename = filename;
+  fffile.open(fffilename.c_str());
+  if (!fffile) {
+    std::cout << "File does not exist!" <<std::endl;
+    exit(-1);
+  } else {
+    while(! fffile.eof() ) 
+      {
+        fffile >> q >> ff;
+	//	std::cout << q << " "<<ff << std::endl;
+        _ffmap[q] = ff;
+      }
+  }
+
+  fffile.close();
+}
+
+double Horowitz::FFval(double Q) 
+{
+  double ff = 1;
+
+    //http://www.bnikolic.co.uk/blog/cpp-map-interp.html
+    // Interpolate from the map.  Must have been initalize for output to make sense
+
+  typedef std::map<double, double>::const_iterator i_t;
+
+  // Q is scaled by Rnfac (see email from Chuck, Oct 17, 2017)
+
+
+  Q *=Rnfac;
+
+  i_t i=_ffmap.upper_bound(Q);
+  if(i==_ffmap.end())
+    {
+      return (--i)->second;
+    }
+  if (i==_ffmap.begin())
+    {
+      return i->second;
+    }
+  i_t l=i; --l;
+  
+  const double delta=(Q- l->first)/(i->first - l->first);
+  ff= delta*i->second +(1-delta)*l->second;
+
+  if (isnan(ff)) {ff=1.;}
+
+  // Note not squared in the file-- square it here
+  return ff*ff;
+
+}
+
+
+void Horowitz::SetFFfilename(const char * fname) {
+  strcpy(filename, fname);
+}
+
+const char * Horowitz::GetFFfilename() {
+  return filename;
+}
+
+
+////////
+
+FormFactor::FormFactor()
+{
+  Rnfac=1.;
+}
+
+FormFactor::FormFactor(const char * type)
+{
+  strcpy(fftype,type);
+  Rnfac=1.;
+
+}
+
+
+void FormFactor::SetA(int Aval) {
+
+  A = Aval;
+
+}
+
+int FormFactor::GetA() { return A;}
+
+
+void FormFactor::SetRnfac(double Rnfacval) {
+
+  Rnfac = Rnfacval;
+
+}
+
+double FormFactor::GetRnfac() { return Rnfac;}
+
+void FormFactor::Setfftype(const char * type) {
+  strcpy(fftype, type);
+}
+
+const char * FormFactor::Getfftype() {
+  return fftype;
+}
