@@ -28,7 +28,8 @@ double Helm::FFval(double Q)
   double qR = Q*Rmod;
     //    double qR = Q*R;
   
-  ff= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*exp(-1.*Q*Q*sval*sval);
+  ff= (3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR))*exp(-1.*Q*Q*sval*sval/2.);
+  //  ff2= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*exp(-1.*Q*Q*sval*sval);
   if (isnan(ff)) {ff=1.;}
     
   return ff;
@@ -55,7 +56,8 @@ double Klein::FFval(double Q)
   //  double R2 = 1.14*pow(A,1./3.);
   double R2 = 1.2*pow(A,1./3.);
   double qR = Q*R2;
-  ff= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*pow(1./(1+akval*akval*Q*Q),2);
+  ff= (3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR))*(1./(1+akval*akval*Q*Q));
+  //  ff2= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*pow(1./(1+akval*akval*Q*Q),2);
 
     
   if (isnan(ff)) {ff=1.;}
@@ -119,8 +121,8 @@ double Horowitz::FFval(double Q)
 
   if (isnan(ff)) {ff=1.;}
 
-  // Note not squared in the file-- square it here
-  return ff*ff;
+  // Note not squared in the file
+  return ff;
 
 }
 

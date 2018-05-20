@@ -259,7 +259,7 @@ int main(int argc, char * argv[] )
 	  double qq = Q/hbarc;
 	  //    double ff2 = helmff->FFval(qq);
 
-	  double ff2 = ff[is]->FFval(qq);
+	  double ff2 = pow(ff[is]->FFval(qq),2);
 
 	  // SM Couplings
 
