@@ -256,7 +256,7 @@ int main(int argc, char * argv[] )
 
 	  double knumin = 0.5*(Erec+sqrt(Erec*Erec+2*M*Erec));
 	  Double_t hbarc = 197.327; // MeV-fm, convert for Q in MeV for ff
-	  double Q = sqrt(2*M*Erec); // MeV
+	  double Q = sqrt(2*M*Erec+Erec*Erec); // MeV
 	  double qq = Q/hbarc;
 	  //    double ff2 = helmff->FFval(qq);
 
