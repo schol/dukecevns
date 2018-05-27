@@ -15,7 +15,8 @@ class FormFactor
  protected:
 
   int A; 
-  double Rnfac;
+  int Z;
+  double Rnfac = 1;
 
   char fftype[80];
  
@@ -30,9 +31,14 @@ class FormFactor
   void SetA(int);
   int GetA();
 
+  void SetZ(int);
+  int GetZ();
+
   // Variation of Rn (as fraction of nominal)
+
   void SetRnfac(double);
   double GetRnfac();
+
 
   void Setfftype(const char *);
   const char * Getfftype();
@@ -56,12 +62,18 @@ class Klein: public FormFactor {
 
  protected:
   double akval;
+  double skinfac=0;
 
  public:
   Klein() : FormFactor("klein") {}
   double FFval(double);
   void Setakval(double);
   double Getakval(); 
+
+  // Skin factor (zero for protons), used for some form factors
+
+  void Setskinfac(double);
+  double Getskinfac();
 
 };
 
