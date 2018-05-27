@@ -5,7 +5,13 @@ double diffxscnvec(double, double, double);
 double diffxscnaxial(double, double, double);
 double diffxscninterf(double, double, double);
 
-double GV_SM(int, int);
-double GA_SM(int, int, int, int, int);
+void sm_vector_couplings(int, double*);
+void sm_axial_couplings(int, int, double*);
+
+double GV_SM(int,int, int);
+double GA_SM(int,int, int, int, int, int);
+
+double mufactor(double);
+double taufactor(double);
 
 #endif

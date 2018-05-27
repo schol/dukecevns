@@ -21,8 +21,11 @@ double Helm::Getsval() { return sval;}
 
 double Helm::FFval(double Q) 
 {
+
+  // Or just use factor on Q...varying Rn
   double ff = 1;
-  double R = 1.14*pow(A,1./3.);
+  //  double R = 1.14*pow(A,1./3.);
+  double R = 1.2*pow(A,1./3.);
   double Rnorig = sqrt(3./5.*pow(R,2)+3*sval*sval);
   double Rmod = sqrt(5./3.*(pow(Rnorig*Rnfac,2)-3*sval*sval));
   double qR = Q*Rmod;
@@ -45,7 +48,16 @@ void Klein::Setakval(double ak) {
 
 }
 
+double Klein::Getskinfac() { return skinfac;}
+
+void Klein::Setskinfac(double sf) {
+
+  skinfac = sf;
+
+}
+
 double Klein::Getakval() { return akval;}
+
 
 
 double Klein::FFval(double Q) 
@@ -54,8 +66,11 @@ double Klein::FFval(double Q)
   double ff = 1;
 
   //  double R2 = 1.14*pow(A,1./3.);
-  double R2 = 1.2*pow(A,1./3.);
-  double qR = Q*R2;
+
+  double R2 = 1.2*pow(A,1./3.)+skinfac*1.01*(double(A)-2.*Z)/double(A);
+
+  double qR = Q*R2*Rnfac;
+
   ff= (3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR))*(1./(1+akval*akval*Q*Q));
   //  ff2= pow(3*(sin(qR)/(qR*qR)-cos(qR)/qR)/(qR),2)*pow(1./(1+akval*akval*Q*Q),2);
 
@@ -63,7 +78,6 @@ double Klein::FFval(double Q)
   if (isnan(ff)) {ff=1.;}
 
   return ff;
-
 
 }
 
@@ -158,6 +172,16 @@ void FormFactor::SetA(int Aval) {
 }
 
 int FormFactor::GetA() { return A;}
+
+
+void FormFactor::SetZ(int Zval) {
+
+  Z = Zval;
+
+}
+
+int FormFactor::GetZ() { return Z;}
+
 
 
 void FormFactor::SetRnfac(double Rnfacval) {
