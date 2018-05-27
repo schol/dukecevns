@@ -170,6 +170,7 @@ int main(int argc, char * argv[] )
 
     A = Nn + Z;
     ff[is]->SetA(A);
+    ff[is]->SetZ(Z);
  
 
     v++; is++;
@@ -263,9 +264,9 @@ int main(int argc, char * argv[] )
 
 	  // SM Couplings
 
-	  double GV_sm = GV_SM(Z,Nn);
-	  double GA_sm = GA_SM(1,Z,Nn,Zdiff,Ndiff);
-	  double GA_sm_bar = GA_SM(-1,Z,Nn,Zdiff,Ndiff);
+	  double GV_sm = GV_SM(2015,Z,Nn);
+	  double GA_sm = GA_SM(2015,1,Z,Nn,Zdiff,Ndiff);
+	  double GA_sm_bar = GA_SM(2015,-1,Z,Nn,Zdiff,Ndiff);
 
 	// Normalize for one ton of material
 	// Weight by mass fraction
