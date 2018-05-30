@@ -251,12 +251,6 @@ double PinchedThermal::fluxval(double Enu, int flavor, double ebinsize)
   // Energy should be in MeV
 
   int j;
-  //  if (flavor == 1) {j=0;}
-  //if (flavor == 2) {j=1;}
-  //if (flavor == 3) {j=2;}
-  //if (flavor == -1) {j=3;}
-  //if (flavor == -2) {j=4;}
-  //if (flavor == -3) {j=5;}
 
   switch (flavor) {
   case 1: j=0; 
@@ -277,13 +271,17 @@ double PinchedThermal::fluxval(double Enu, int flavor, double ebinsize)
 
 
   // Conversions for flux at 10 kpc
-  const double dist=3.08568025e22; // [dist]=cm, 10 kpc
 
-  double N=pow((alpha[j]+1.),(alpha[j]+1.))/(avgen[j]*tgamma(alpha[j]+1.));
-  double phi=N*pow((Enu/avgen[j]),alpha[j])*exp((-1.)*(alpha[j]+1.)*Enu/avgen[j]); 
+  double fluxtot= 0.;
+  if (alpha[j]>0 && avgen[j]>0  && luminosity[j]>0) {
+    const double dist=3.08568025e22; // [dist]=cm, 10 kpc
 
-  double fluxtot = 1./(4*M_PI*dist*dist)*luminosity[j]/avgen[j]*phi*ebinsize;
+    double N=pow((alpha[j]+1.),(alpha[j]+1.))/(avgen[j]*tgamma(alpha[j]+1.));
+    double phi=N*pow((Enu/avgen[j]),alpha[j])*exp((-1.)*(alpha[j]+1.)*Enu/avgen[j]); 
 
+    fluxtot = 1./(4*M_PI*dist*dist)*luminosity[j]/avgen[j]*phi*ebinsize;
+
+  }
   return fluxtot*norm;
 
 }
