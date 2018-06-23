@@ -6,6 +6,9 @@
   std::map<std::string,int> Zdiffs;
   std::map<std::string,int> Ndiffs;
 
+  Zs["C12"] = 6;
+  Zs["C13"] = 6;
+
   Zs["Ne20"]= 10;
   Zs["Ne21"]= 10;
   Zs["Ne22"]= 10;
@@ -35,6 +38,9 @@
   Zs["Xe136"]= 54;
 
   Zs["Cs133"]= 55;
+
+  Ns["C12"] = 6;
+  Ns["C13"] = 7;
 
   Ns["Ne20"]= 10;
   Ns["Ne21"]= 11;
@@ -67,6 +73,10 @@
   Ns["Cs133"]= 78;
 
 
+  Deltas["C12"] = 0;
+  Deltas["C13"] = 3.125;
+
+
   Deltas["Ne20"]= -7.02;
   Deltas["Ne21"]= -5.731;
   Deltas["Ne22"]= -8.024;
@@ -97,6 +107,8 @@
 
   Deltas["Cs133"]= -88.070;
 
+  Zdiffs["C12"] = 0;
+  Zdiffs["C13"] = 0;
 
   Zdiffs["Ne20"]= 0;
   Zdiffs["Ne21"]= 0;
@@ -128,7 +140,8 @@
 
   Zdiffs["Cs133"]= 1;
 
-
+  Ndiffs["C12"] = 0;
+  Ndiffs["C13"] = 1;
 
   Ndiffs["Ne20"]= 0;
   Ndiffs["Ne21"]= 1;

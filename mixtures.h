@@ -9,6 +9,17 @@ double me=0.511;
 
 double mass_fraction[max_components];
 
+  isotopes["C"].push_back("C12");
+  molar_fraction["C"].push_back(0.9893);
+  isotopes["C"].push_back("C13");
+  molar_fraction["C"].push_back(0.0107);
+
+
+  isotopes["C12"].push_back("C12");
+  molar_fraction["C"].push_back(1.0);
+  isotopes["C13"].push_back("C13");
+  molar_fraction["C13"].push_back(1.0);
+
   isotopes["Ne"].push_back("Ne20");
   molar_fraction["Ne"].push_back(0.9048);
   isotopes["Ne"].push_back("Ne21");
