@@ -16,7 +16,7 @@ class FormFactor
 
   int A; 
   int Z;
-  double Rnfac = 1;
+  double Rfac = 1;
 
   char fftype[80];
  
@@ -36,8 +36,8 @@ class FormFactor
 
   // Variation of Rn (as fraction of nominal)
 
-  void SetRnfac(double);
-  double GetRnfac();
+  void SetRfac(double);
+  double GetRfac();
 
 
   void Setfftype(const char *);

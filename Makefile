@@ -91,14 +91,14 @@ supernova_diff_rates.o:
 
 
 
-formfactors: formfactors.o $(libdiffspec) 
+rn_scaling: rn_scaling.o $(libdiffspec) 
 	$(RM) $@
 	$(CXX) -o $@ $(CXXFLAGS) -L. $^ $(ROOTLIBS)
 
 
-.PHONY: formfactors.o
-formfactors.o: 
-	$(CXX) -o formfactors.o $(ROOTCFLAGS) $(CXXFLAGS) -c formfactors.cc
+.PHONY: rn_scaling.o
+rn_scaling.o: 
+	$(CXX) -o rn_scaling.o $(ROOTCFLAGS) $(CXXFLAGS) -c rn_scaling.cc
 
 
 nufluxes: nufluxes.o $(libdiffspec) 

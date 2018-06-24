@@ -176,7 +176,7 @@ double NumericalFlux::fluxval(double enu,int flavor, double ebinsize)
 
   typedef std::map<double, double>::const_iterator i_t;
 
-  // Q is scaled by Rnfac (see email from Chuck, Oct 17, 2017)
+  // Q is scaled by Rfac (see email from Chuck, Oct 17, 2017)
 
   std::map<double, double> _fluxmap;
   

@@ -30,7 +30,7 @@ int main(int argc, char * argv[] )
 
   
   if (argc<3) {
-    std::cout << "Usage:  ./diff_rates [target material] [form factor] [Rnfac]"<<std::endl;
+    std::cout << "Usage:  ./diff_rates [target material] [form factor] [Rfac]"<<std::endl;
     exit(0);
   }
 
@@ -39,9 +39,9 @@ int main(int argc, char * argv[] )
 
   const char * ffname = argv[2];
 
-  double rnfac=1.;
+  double rfac=1.;
   if (argc >=4) {
-     rnfac = (double)atof(argv[3]);
+     rfac = (double)atof(argv[3]);
   }
 
 
@@ -165,7 +165,7 @@ int main(int argc, char * argv[] )
       //      std::cout << horowitz_filename << std::endl;
       horowitzff->SetFFfilename(horowitz_filename.c_str());
       horowitzff->ReadFFfile();
-      horowitzff->SetRnfac(rnfac);
+      horowitzff->SetRfac(rfac);
     }
 
     A = Nn + Z;
