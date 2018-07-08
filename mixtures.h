@@ -9,6 +9,15 @@ double me=0.511;
 
 double mass_fraction[max_components];
 
+  isotopes["scint"].push_back("H1");
+  molar_fraction["scint"].push_back(0.66659);
+  isotopes["scint"].push_back("H2");
+  molar_fraction["scint"].push_back(0.000076667);
+  isotopes["scint"].push_back("C12");
+  molar_fraction["scint"].push_back(0.329767);
+  isotopes["scint"].push_back("C13");
+  molar_fraction["scint"].push_back(0.00356667);
+
   isotopes["C"].push_back("C12");
   molar_fraction["C"].push_back(0.9893);
   isotopes["C"].push_back("C13");
