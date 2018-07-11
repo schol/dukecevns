@@ -25,7 +25,7 @@ double mass_fraction[max_components];
 
 
   isotopes["C12"].push_back("C12");
-  molar_fraction["C"].push_back(1.0);
+  molar_fraction["C12"].push_back(1.0);
   isotopes["C13"].push_back("C13");
   molar_fraction["C13"].push_back(1.0);
 
