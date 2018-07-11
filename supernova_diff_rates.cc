@@ -32,7 +32,7 @@ int main(int argc, char * argv[] )
 
   
   if (argc<4) {
-    std::cout << "Usage:  ./supernova_diff_rates [target material] [form factor] [Rfac] [qfname]"<<std::endl;
+    std::cout << "Usage:  ./supernova_diff_rates [target material] [form factor] [qfname] [Rfac] [photons per MeVee]"<<std::endl;
     exit(0);
   }
 
@@ -47,6 +47,15 @@ int main(int argc, char * argv[] )
   if (argc >=5) {
      rfac = (double)atof(argv[4]);
   }
+
+
+  // Photons per Eee in MeV
+
+  double lightyield=24000.;
+  if (argc >=6) {
+     lightyield = (double)atof(argv[5]);
+  }
+
 
 
   // Array of pointers to form factors
@@ -82,13 +91,13 @@ int main(int argc, char * argv[] )
 
   std::ofstream outfile;
   std::string outfilename;
-  outfilename = "supernova_diff_rates-"+material+"-"+std::string(ffname)+".out";
+  outfilename = "out/supernova_diff_rates-"+material+"-"+std::string(ffname)+".out";
   outfile.open(outfilename);
 
 
   std::ofstream phoutfile;
   std::string phoutfilename;
-  phoutfilename = "supernova_diff_rates-"+material+"-"+std::string(ffname)+"-photons.out";
+  phoutfilename = "out/supernova_diff_rates-"+material+"-"+std::string(ffname)+"-photons.out";
   phoutfile.open(phoutfilename);
   
    // Array for quenched total rates
@@ -164,7 +173,7 @@ int main(int argc, char * argv[] )
       Horowitz* horowitzff = new Horowitz();
       ff[is] = horowitzff;
       std::transform(isoname.begin(), isoname.end(),isoname.begin(), ::toupper);
-      std::string horowitz_filename = isoname+".FF";
+      std::string horowitz_filename = "ff/"+isoname+".FF";
       //      std::cout << horowitz_filename << std::endl;
       horowitzff->SetFFfilename(horowitz_filename.c_str());
       horowitzff->ReadFFfile();
@@ -180,7 +189,7 @@ int main(int argc, char * argv[] )
   // Set up detector quenching factors for each component
     
     std::string qffilename;
-    qffilename = std::string(qfname)+"_"+isoname+"_qf.txt";
+    qffilename = "qf/"+std::string(qfname)+"_"+isoname+"_qf.txt";
 
     std::cout << "Quenching factor: "<<qffilename<<std::endl;
     DetectorResponse* qf = new DetectorResponse();
@@ -211,7 +220,7 @@ int main(int argc, char * argv[] )
     std::cout << "erecmaxall "<<erecmaxall<<std::endl;
 
     //   double knustep = 0.0001;
-    double knustep = 0.1;
+    double knustep = 0.001;
 
    // The totals
    double toterecoil = 0.;
@@ -492,7 +501,7 @@ int main(int argc, char * argv[] )
 
    std::ofstream phoutfile2;
    std::string phoutfilename2;
-   phoutfilename2 = "supernova_diff_rates-"+material+"-"+std::string(ffname)+"-photons2.out";
+   phoutfilename2 = "out/supernova_diff_rates-"+material+"-"+std::string(ffname)+"-photons2.out";
     phoutfile2.open(phoutfilename2);
 
    int nquenched = iq;  // Number of quenched points
@@ -555,8 +564,7 @@ int main(int argc, char * argv[] )
 
 
 
-   double light_yield = 24000.;  // Photons per Eee 
-   std::cout<< "Total quenched energy deposited in MeV "<<sumquencheden*time_interval<<" photons: "<<sumquencheden*light_yield*time_interval<<std::endl;
+   std::cout<< "Total quenched energy deposited in MeV "<<sumquencheden*time_interval<<" photons: "<<sumquencheden*lightyield*time_interval<<std::endl;
     phoutfile2.close();
    
 
