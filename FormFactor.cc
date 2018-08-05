@@ -102,7 +102,7 @@ void Horowitz::ReadFFfile()
   std::string fffilename = filename;
   fffile.open(fffilename.c_str());
   if (!fffile) {
-    std::cout << "File does not exist!" <<std::endl;
+    std::cout << "File "<<fffilename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
     while(! fffile.eof() ) 

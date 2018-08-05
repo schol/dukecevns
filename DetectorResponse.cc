@@ -18,7 +18,7 @@ void DetectorResponse::ReadQFFile()
   std::string filename = qffilename;
   qffile.open(filename.c_str());
   if (!qffile) {
-    std::cout << "File does not exist!" <<std::endl;
+    std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
     while(! qffile.eof() ) 
@@ -102,7 +102,7 @@ void DetectorResponse::ReadQFPolyFile() {
   std::string filename = qfpolyfilename;
   qfpolyfile.open(filename.c_str());
   if (!qfpolyfile) {
-    std::cout << "File does not exist!" <<std::endl;
+    std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
     qfpolyfile >> polyrange[0]>>polyrange[1];
@@ -199,7 +199,7 @@ void DetectorResponse::ReadEfficFile()
   std::string filename = efficfilename;
   efficfile.open(filename.c_str());
   if (!efficfile) {
-    std::cout << "File does not exist!" <<std::endl;
+    std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
     while(! efficfile.eof() ) 

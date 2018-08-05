@@ -143,7 +143,7 @@ void NumericalFlux::ReadFluxFile()
   std::string fluxfilename = filename;
   fluxfile.open(fluxfilename.c_str());
   if (!fluxfile) {
-    std::cout << "File does not exist!" <<std::endl;
+    std::cout << "File "<<fluxfilename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
     while(! fluxfile.eof() ) 
