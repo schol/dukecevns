@@ -537,6 +537,7 @@ int main(int argc, char * argv[] )
    double enee;
    double eneestep=0.0001;
    double sumquencheden=0;
+   double sumquenchedevents=0;
 
    std::cout << "Max enee "<<max_enee<<std::endl;
    for (enee=0;enee<=max_enee;enee+=eneestep) {
@@ -556,15 +557,16 @@ int main(int argc, char * argv[] )
        totquencheden +=qspecval*enee;
      }
      std::cout<<totquencheden<<std::endl;
+     sumquenchedevents += totquenchedevents;
      sumquencheden += totquencheden*eneestep;
 
-     phoutfile2<<totquenchedevents<<std::endl;
+     std::cout<<totquenchedevents<<std::endl;
 
    } // End of loop over quenched energies
 
 
 
-   std::cout<< "Total quenched energy deposited in MeV "<<sumquencheden*time_interval<<" photons: "<<sumquencheden*lightyield*time_interval<<std::endl;
+   std::cout<< "Total quenched energy deposited in MeV "<<sumquencheden*time_interval<<" events "<<sumquenchedevents*time_interval<<" photons: "<<sumquencheden*lightyield*time_interval<<std::endl;
     phoutfile2.close();
    
 

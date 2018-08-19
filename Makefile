@@ -2,7 +2,7 @@
 ROOTCFLAGS = `root-config --cflags`
 ROOTLIBS   = `root-config --libs`
 
-CXXFLAGS += -I. -Wall -std=c++11 
+CXXFLAGS += -I. -I./json/include -Wall -std=c++11 
 
 
 %.o : %.c
@@ -67,6 +67,57 @@ csi_check: csi_check.o $(libdiffspec)
 .PHONY: csi_check.o
 csi_check.o: 
 	$(CXX) -o csi_check.o $(ROOTCFLAGS) $(CXXFLAGS) -c csi_check.cc
+
+
+nai_check: nai_check.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: nai_check.o
+nai_check.o: 
+	$(CXX) -o nai_check.o $(ROOTCFLAGS) $(CXXFLAGS) -c nai_check.cc
+
+
+na23_check: na23_check.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: na23_check.o
+na23_check.o: 
+	$(CXX) -o na23_check.o $(ROOTCFLAGS) $(CXXFLAGS) -c na23_check.cc
+
+
+lar_sns: lar_sns.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: lar_sns.o
+lar_sns.o: 
+	$(CXX) -o lar_sns.o $(ROOTCFLAGS) $(CXXFLAGS) -c lar_sns.cc
+
+
+sns_rates: sns_rates.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: sns_rates.o
+sns_rates.o: 
+	$(CXX) -o sns_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c sns_rates.cc
+
+
+
+check_xscn: check_xscn.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: check_xscn.o
+check_xscn.o: 
+	$(CXX) -o check_xscn.o $(ROOTCFLAGS) $(CXXFLAGS) -c check_xscn.cc
 
 
 

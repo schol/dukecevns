@@ -58,7 +58,7 @@ class DetectorResponse
 
   // For efficiency as a function of Erec, file in numerical format
 
-  void SetEfficFilename(const char * qffilename);
+  void SetEfficFilename(const char * efficfilename);
   const char * GetEfficFilename();
   void ReadEfficFile();
   double efficnum(double);

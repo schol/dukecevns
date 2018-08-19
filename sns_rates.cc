@@ -1,15 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 #include "DetectorResponse.h"
 #include "FormFactor.h"
 #include "NuFlux.h"
-// #include "TFile.h"
-// #include "TGraph.h"
-// #include "TObjArray.h"
-// #include "TString.h"
-// #include "TMath.h"
-// #include "TH2D.h"
+
 
 #include <algorithm>
 #include <cstdlib>
@@ -27,6 +25,27 @@ void get_flavor_weight(double,double,double*, double*, double*);
 int main(int argc, char * argv[] )
 {
 
+  if (argc<2) {
+    std::cout << "Usage:  ./sns_diff_rates [jsonfile]"<<std::endl;
+    exit(0);
+  }
+
+  const char * jsonfile = argv[1];
+  
+  std::string jsonfilename = std::string(jsonfile)+".json";
+  
+
+// Read a JSON file with the parameters
+    std::ifstream i(jsonfilename);
+    json j;
+    i >> j;
+
+    // print values
+    std::cout << j << '\n';
+
+    std::cout << j["flux"]["nusperprotonperflavor"]<<std::endl;
+
+    // Made these before adding json functionality
 #include "isomaps.h"
   // Info for relevant mixtures
 #include "mixtures.h"
@@ -41,13 +60,16 @@ int main(int argc, char * argv[] )
 
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
   //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
-  get_flavor_weight(0.,6000.,&wnumu,&wnumubar,&wnue);
+
+  double tw1 = j["timewindow"]["start"];
+  double tw2 = j["timewindow"]["end"];
+  get_flavor_weight(tw1,tw2,&wnumu,&wnumubar,&wnue);
 
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
   // Set up the form factor
 
-  const char * ffname = "helm";
+  std::string ffname = j["formfactor"]["type"];
 
   // Array of pointers to form factors, for protons and neutrons separately, axial and vector separately
   // (although small differences
@@ -75,27 +97,42 @@ int main(int argc, char * argv[] )
   std::cout << "kmax "<<kmax << std::endl;
   // Normalize flux for 19.3 m from SNS, per cm^2 per s
   //snsflux->SetNorm(5.e14/(4*M_PI*1950.*1950.));
-    snsflux->SetNorm(5.2e14/(4*M_PI*2900.*2900.));
+
+  double mevperproton = j["flux"]["mevperproton"];
+  double jperproton= mevperproton*1.e6*1.6021e-19;
+  double beampower = j["flux"]["power"];
+  beampower*=1.e6; // in Joules/s
+  double protonspersec = beampower/jperproton;
+  double nusperprotonperflavor = j["flux"]["nusperprotonperflavor"];
+  double nuspersecperflavor = nusperprotonperflavor*protonspersec;
+  double dist = j["distance"];
+  std::cout << "Nus per sec per flavor "<<nuspersecperflavor<<" "<<dist<<std::endl;
+  snsflux->SetNorm(nuspersecperflavor/(4*M_PI*dist*dist));
   // Gives flux per pidk per energy bin per second, energy bin in MeV,  normalize for 5e14 decays/s 
 
   // Set up the detector response
 
   
-    //   DetectorResponse* csitl = new DetectorResponse();
+  DetectorResponse* detresp = new DetectorResponse();
 
-    //csitl->SetEfficFilename("bjorn-eff.dat");
-    //csitl->ReadEfficFile();
+  std::string eff_filename = j["detectorresponse"]["efficiencyfile"];
+  std::cout << "eff_filename: "<<eff_filename<<std::endl;
+  detresp->SetEfficFilename(eff_filename.c_str());
+  detresp->ReadEfficFile();
 
     // Set up the material
 
-    //    std::string material = "Na23";
-    std::string material = "Ar";
+    //    std::string material = "Ar40";
+
+    std::string material = j["material"];
+    
 
   std::ofstream outfile;
   std::string outfilename;
-  outfilename = "lar_sns_diff_rates-"+material+"-"+std::string(ffname)+".out";
+  //  outfilename = "sns_diff_rates-"+material+"-"+std::string(ffname)+".out";
+  outfilename = "sns_diff_rates-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
   outfile.open(outfilename);
- 
+  std::cout << outfilename <<std::endl;
 
   double M;
   double Delta;
@@ -141,28 +178,39 @@ int main(int argc, char * argv[] )
     //       std::cout << "Mass "<<M<<std::endl;
 
 
-    double rfac=1.;
-    if (strcmp(ffname, "helm")==0) {
+    double nvrfact = j["formfactor"]["nvrfact"];
+    double narfact = j["formfactor"]["narfact"];
+    double pvrfact = j["formfactor"]["pvrfact"];
+    double parfact = j["formfactor"]["parfact"];
+    double nvsfact = j["formfactor"]["nvsfact"];
+    double nasfact = j["formfactor"]["nasfact"];
+    double pvsfact = j["formfactor"]["pvsfact"];
+    double pasfact = j["formfactor"]["pasfact"];
+
+    if (ffname == "helm") {
       Helm* helmffnv= new Helm();
       ffnv[is] = helmffnv;
-      helmffnv->Setsval(0.9);
+      helmffnv->Setsval(nvsfact);
+      helmffnv->SetRfac(nvrfact);
 
       Helm* helmffna= new Helm();
       ffna[is] = helmffna;
-      helmffna->Setsval(0.9);
+      helmffna->Setsval(nasfact);
+      helmffna->SetRfac(narfact);
 
       Helm* helmffpv= new Helm();
       ffpv[is] = helmffpv;
-      helmffpv->Setsval(0.9);
+      helmffpv->Setsval(pvsfact);
+      helmffpv->SetRfac(pvrfact);
 
 
       Helm* helmffpa= new Helm();
       ffpa[is] = helmffpa;
-      helmffpa->Setsval(0.9);
-
+      helmffpa->Setsval(pasfact);
+      helmffpa->SetRfac(parfact);
 
     }
-    else if (strcmp(ffname, "klein")==0) {
+    else if (ffname == "klein") {
 
       Klein* kleinffnv = new Klein();
       ffnv[is] = kleinffnv;
@@ -191,7 +239,7 @@ int main(int argc, char * argv[] )
 
 
     } 
-    else if  (strcmp(ffname, "horowitz")==0){
+    else if  (ffname =="horowitz"){
       Horowitz* horowitzffnv = new Horowitz();
       ffnv[is] = horowitzffnv;
 
@@ -211,21 +259,21 @@ int main(int argc, char * argv[] )
       //      std::cout << horowitz_filename << std::endl;
       horowitzffnv->SetFFfilename(horowitz_filename.c_str());
       horowitzffnv->ReadFFfile();
-      horowitzffnv->SetRfac(rfac);
+      horowitzffnv->SetRfac(nvrfact);
 
       horowitzffna->SetFFfilename(horowitz_filename.c_str());
       horowitzffna->ReadFFfile();
-      horowitzffna->SetRfac(rfac);
+      horowitzffna->SetRfac(narfact);
 
       //      std::cout << horowitz_filename << std::endl;
       // Not really appropriate for protons, but using the structure
       horowitzffpv->SetFFfilename(horowitz_filename.c_str());
       horowitzffpv->ReadFFfile();
-      horowitzffpv->SetRfac(1.);
+      horowitzffpv->SetRfac(pvrfact);
 
       horowitzffpa->SetFFfilename(horowitz_filename.c_str());
       horowitzffpa->ReadFFfile();
-      horowitzffpa->SetRfac(1.);
+      horowitzffpa->SetRfac(parfact);
 
     }
 
@@ -297,10 +345,10 @@ int main(int argc, char * argv[] )
      
      // With efficiency, which is a function of Erec in MeV in this formuation
      
-     //     double eff_factor = csitl->efficnum(Erec);
+     double eff_factor = detresp->efficnum(Erec);
 
      
-     double eff_factor = 1.;
+     //     double eff_factor = 1.;
      std::cout << "eff factor "<<eff_factor<<std::endl;
      // Skip if too small contribution
      if (eff_factor>0.0001) {
@@ -352,7 +400,7 @@ int main(int argc, char * argv[] )
 	 //double GA_sm_bar = GA_SM(2015,-1,Z,Nn,Zdiff,Ndiff);
 	   
 	 double gv[2], ga[2], gabar[2];
-	 int pdgyr = 2015;
+	 int pdgyr = j["couplings"]["pdgyear"];
 	 sm_vector_couplings(pdgyr,gv);
 	 sm_axial_couplings(pdgyr,1,ga);
 	 sm_axial_couplings(pdgyr,-1,gabar);
@@ -427,7 +475,10 @@ int main(int argc, char * argv[] )
 	 // Now multiply by target-dependent factors and add up this recoil energy bin
 
 	 //	 double mufact = 1.037; too large!
-	 double mufact = mufactor(Q);
+	 double mufact=1.;
+	 if (j["couplings"]["chargeradiusfactor"] == "yes") {
+	   mufact = mufactor(Q);
+	 }
 	 diffrate_e_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_e_vec;
 	 diffrate_ebar_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_ebar_vec;
 	 diffrate_mu_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_mu_vec*mufact;
@@ -464,15 +515,16 @@ int main(int argc, char * argv[] )
 
      std::cout << Erec<<" "<<diffrate_e_vec<<" "<<diffrate_ebar_vec<<" "<<diffrate_mu_vec<<" "<<diffrate_mubar_vec<<" "<<diffrate_tau_vec<<" "<<diffrate_taubar_vec<<" "<<diffrate_e_axial<<" "<<diffrate_ebar_axial<<" "<<diffrate_mu_axial<<" "<<diffrate_mubar_axial<<" "<<diffrate_tau_axial<<" "<<diffrate_taubar_axial<<" "<<diffrate_e_interf<<" "<<diffrate_ebar_interf<<" "<<diffrate_mu_interf<<" "<<diffrate_mubar_interf<<" "<<diffrate_tau_interf<<" "<<diffrate_taubar_interf <<std::endl;
 
-
-
      //	double detector_mass = 0.01457; // tons
-     double detector_mass = 0.750; // tons
-	double exposure = 365.25*24.*3600.; //  1 year * 0.892
+     double detector_mass = j["mass"]; // tons
+     double hoursperyear =j["flux"]["hoursperyear"];
+     double exposure = 3600.*hoursperyear;
 
 	// Overall norm factor
 
 	double norm_factor = eff_factor*detector_mass*exposure;
+
+
 
 	diffrate_e_vec *= norm_factor*wnue;
 	diffrate_ebar_vec *= norm_factor;
