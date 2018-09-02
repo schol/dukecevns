@@ -115,10 +115,20 @@ int main(int argc, char * argv[] )
   
   DetectorResponse* detresp = new DetectorResponse();
 
+  double recoilthresh = 0.; //MeVr
+
+  
   std::string eff_filename = j["detectorresponse"]["efficiencyfile"];
   std::cout << "eff_filename: "<<eff_filename<<std::endl;
-  detresp->SetEfficFilename(eff_filename.c_str());
-  detresp->ReadEfficFile();
+  if (eff_filename != "none") {
+    detresp->SetEfficFilename(eff_filename.c_str());
+    detresp->ReadEfficFile();
+  } else {
+    recoilthresh = j["detectorresponse"]["stepthresh"];
+    detresp->SetStepThresh(recoilthresh); // Not actually needed
+  }
+
+
 
     // Set up the material
 
@@ -182,12 +192,18 @@ int main(int argc, char * argv[] )
     double narfact = j["formfactor"]["narfact"];
     double pvrfact = j["formfactor"]["pvrfact"];
     double parfact = j["formfactor"]["parfact"];
-    double nvsfact = j["formfactor"]["nvsfact"];
-    double nasfact = j["formfactor"]["nasfact"];
-    double pvsfact = j["formfactor"]["pvsfact"];
-    double pasfact = j["formfactor"]["pasfact"];
+
 
     if (ffname == "helm") {
+      
+      
+      
+      double nvsfact = j["formfactor"]["nvsfact"];
+      double nasfact = j["formfactor"]["nasfact"];
+      double pvsfact = j["formfactor"]["pvsfact"];
+      double pasfact = j["formfactor"]["pasfact"];
+
+
       Helm* helmffnv= new Helm();
       ffnv[is] = helmffnv;
       helmffnv->Setsval(nvsfact);
@@ -212,30 +228,39 @@ int main(int argc, char * argv[] )
     }
     else if (ffname == "klein") {
 
+      double nvak = j["formfactor"]["nvak"];
+      double naak = j["formfactor"]["naak"];
+      double pvak = j["formfactor"]["pvak"];
+      double paak = j["formfactor"]["paak"];
+      double nvskin = j["formfactor"]["nvskin"];
+      double naskin = j["formfactor"]["naskin"];
+      double pvskin = j["formfactor"]["pvskin"];
+      double paskin = j["formfactor"]["paskin"];
+
       Klein* kleinffnv = new Klein();
       ffnv[is] = kleinffnv;
-      kleinffnv->Setakval(0.7);
-      kleinffnv->SetRfac(1.);
-      kleinffnv->Setskinfac(1.);
+      kleinffnv->Setakval(nvak);
+      kleinffnv->SetRfac(nvrfact);
+      kleinffnv->Setskinfac(nvskin);
 
       Klein* kleinffna = new Klein();
       ffna[is] = kleinffna;
-      kleinffna->Setakval(0.7);
-      kleinffna->SetRfac(1.);
-      kleinffna->Setskinfac(1.);
+      kleinffna->Setakval(naak);
+      kleinffna->SetRfac(narfact);
+      kleinffna->Setskinfac(naskin);
 
       Klein* kleinffpv = new Klein();
       ffpv[is] = kleinffpv;
-      kleinffpv->Setakval(0.7);
-      kleinffpv->SetRfac(1.);
-      kleinffpv->Setskinfac(0.);
+      kleinffpv->Setakval(pvak);
+      kleinffpv->SetRfac(pvrfact);
+      kleinffpv->Setskinfac(pvskin);
 
 
       Klein* kleinffpa = new Klein();
       ffpa[is] = kleinffpa;
-      kleinffpa->Setakval(0.7);
-      kleinffpa->SetRfac(1.);
-      kleinffpv->Setskinfac(0.);
+      kleinffpa->Setakval(paak);
+      kleinffpa->SetRfac(parfact);
+      kleinffpv->Setskinfac(paskin);
 
 
     } 
@@ -298,7 +323,6 @@ int main(int argc, char * argv[] )
   double erecmaxall = 2*kmax*kmax/(minM+2*kmax);
   
   //double recoilthresh = 0.013; //MeVr
-  double recoilthresh = 0.; //MeVr
   double erecstart = recoilthresh;
   double erecend = erecmaxall;
   //  double erecstep = 0.0001;
@@ -345,8 +369,10 @@ int main(int argc, char * argv[] )
      
      // With efficiency, which is a function of Erec in MeV in this formuation
      
-     double eff_factor = detresp->efficnum(Erec);
-
+     double eff_factor = 1;
+     if (eff_filename != "none") {
+       eff_factor = detresp->efficnum(Erec);
+     }
      
      //     double eff_factor = 1.;
      std::cout << "eff factor "<<eff_factor<<std::endl;
@@ -405,11 +431,31 @@ int main(int argc, char * argv[] )
 	 sm_axial_couplings(pdgyr,1,ga);
 	 sm_axial_couplings(pdgyr,-1,gabar);
 
+
 	 // Bundle the form factor contributions with the SM couplings, separately for p and n
 	 double GV_sm_wff = Z*gv[0]*ffpvval+Nn*gv[1]*ffnvval;
 	 double GA_sm_wff = Zdiff*ga[0]*ffpaval+Ndiff*ga[1]*ffnaval;
 	 double GA_sm_bar_wff = Zdiff*gabar[0]*ffpaval+Ndiff*gabar[1]*ffnaval;
  
+
+	 // Charge radius correction
+	 double mufact=1.;
+
+	 if (j["couplings"]["chargeradiusfactor"] == "sehgal") {
+	   mufact = mufactor(Q);
+	 }	   
+
+	double GV_sm_wff_e=GV_sm_wff;
+	double GV_sm_wff_mu=GV_sm_wff;
+	double GV_sm_wff_tau= GV_sm_wff;
+
+	if  (j["couplings"]["chargeradiusfactor"] == "erler") {
+	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3))*ffpvval+Nn*gv[1]*ffnvval;
+	  
+	}
+
 	 // Normalize for one ton of material
 	 // Will be weighted by mass fraction
 	    
@@ -474,17 +520,13 @@ int main(int argc, char * argv[] )
 	   
 	 // Now multiply by target-dependent factors and add up this recoil energy bin
 
-	 //	 double mufact = 1.037; too large!
-	 double mufact=1.;
-	 if (j["couplings"]["chargeradiusfactor"] == "yes") {
-	   mufact = mufactor(Q);
-	 }
-	 diffrate_e_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_e_vec;
-	 diffrate_ebar_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_ebar_vec;
-	 diffrate_mu_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_mu_vec*mufact;
-	 diffrate_mubar_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_mubar_vec*mufact;
-	 diffrate_tau_vec +=  norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_tau_vec;
-	 diffrate_taubar_vec += norm*pow(GV_sm_wff,2)*mass_fraction[is]*drate_taubar_vec;
+
+	 diffrate_e_vec += norm*pow(GV_sm_wff_e,2)*mass_fraction[is]*drate_e_vec;
+	 diffrate_ebar_vec += norm*pow(GV_sm_wff_e,2)*mass_fraction[is]*drate_ebar_vec;
+	 diffrate_mu_vec += norm*pow(GV_sm_wff_mu,2)*mass_fraction[is]*drate_mu_vec*mufact;
+	 diffrate_mubar_vec += norm*pow(GV_sm_wff_mu,2)*mass_fraction[is]*drate_mubar_vec*mufact;
+	 diffrate_tau_vec +=  norm*pow(GV_sm_wff_tau,2)*mass_fraction[is]*drate_tau_vec;
+	 diffrate_taubar_vec += norm*pow(GV_sm_wff_tau,2)*mass_fraction[is]*drate_taubar_vec;
 
 
 	 diffrate_e_axial += norm*pow(GA_sm_wff,2)*mass_fraction[is]*drate_e_axial;
@@ -513,7 +555,11 @@ int main(int argc, char * argv[] )
 
      } // End of efficiency factor check
 
-     std::cout << Erec<<" "<<diffrate_e_vec<<" "<<diffrate_ebar_vec<<" "<<diffrate_mu_vec<<" "<<diffrate_mubar_vec<<" "<<diffrate_tau_vec<<" "<<diffrate_taubar_vec<<" "<<diffrate_e_axial<<" "<<diffrate_ebar_axial<<" "<<diffrate_mu_axial<<" "<<diffrate_mubar_axial<<" "<<diffrate_tau_axial<<" "<<diffrate_taubar_axial<<" "<<diffrate_e_interf<<" "<<diffrate_ebar_interf<<" "<<diffrate_mu_interf<<" "<<diffrate_mubar_interf<<" "<<diffrate_tau_interf<<" "<<diffrate_taubar_interf <<std::endl;
+     std::cout <<Erec<<scientific<<" "<<diffrate_e_vec<<" "<<diffrate_ebar_vec<<" "<<diffrate_mu_vec<<" "<<diffrate_mubar_vec<<" "<<diffrate_tau_vec<<" "<<diffrate_taubar_vec<<" "<<diffrate_e_axial<<" "<<diffrate_ebar_axial<<" "<<diffrate_mu_axial<<" "<<diffrate_mubar_axial<<" "<<diffrate_tau_axial<<" "<<diffrate_taubar_axial<<" "<<diffrate_e_interf<<" "<<diffrate_ebar_interf<<" "<<diffrate_mu_interf<<" "<<diffrate_mubar_interf<<" "<<diffrate_tau_interf<<" "<<diffrate_taubar_interf <<std::endl;
+
+     // Only want diff values in scientific format
+     std::cout.unsetf(ios::fixed | ios::scientific);
+
 
      //	double detector_mass = 0.01457; // tons
      double detector_mass = j["mass"]; // tons
@@ -549,8 +595,10 @@ int main(int argc, char * argv[] )
 
 
 
-	outfile << Erec<<" "<<diffrate_e_vec<<" "<<diffrate_ebar_vec<<" "<<diffrate_mu_vec<<" "<<diffrate_mubar_vec<<" "<<diffrate_tau_vec<<" "<<diffrate_taubar_vec<<" "<<diffrate_e_axial<<" "<<diffrate_ebar_axial<<" "<<diffrate_mu_axial<<" "<<diffrate_mubar_axial<<" "<<diffrate_tau_axial<<" "<<diffrate_taubar_axial<<" "<<diffrate_e_interf<<" "<<diffrate_ebar_interf<<" "<<diffrate_mu_interf<<" "<<diffrate_mubar_interf<<" "<<diffrate_tau_interf<<" "<<diffrate_taubar_interf <<std::endl;
-   
+	outfile << Erec<<scientific<<" "<<diffrate_e_vec<<" "<<diffrate_ebar_vec<<" "<<diffrate_mu_vec<<" "<<diffrate_mubar_vec<<" "<<diffrate_tau_vec<<" "<<diffrate_taubar_vec<<" "<<diffrate_e_axial<<" "<<diffrate_ebar_axial<<" "<<diffrate_mu_axial<<" "<<diffrate_mubar_axial<<" "<<diffrate_tau_axial<<" "<<diffrate_taubar_axial<<" "<<diffrate_e_interf<<" "<<diffrate_ebar_interf<<" "<<diffrate_mu_interf<<" "<<diffrate_mubar_interf<<" "<<diffrate_tau_interf<<" "<<diffrate_taubar_interf <<std::endl;
+	// Reset the format
+     std::cout.unsetf(ios::fixed | ios::scientific);
+     
 	double events=0;
 	events = diffrate_e_vec + diffrate_ebar_vec + diffrate_mu_vec+ diffrate_mubar_vec+ diffrate_tau_vec + diffrate_taubar_vec;
 	events += diffrate_e_axial + diffrate_ebar_axial + diffrate_mu_axial+ diffrate_mubar_axial+ diffrate_tau_axial + diffrate_taubar_axial;
@@ -565,8 +613,22 @@ int main(int argc, char * argv[] )
    std::cout << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
    std::cout << "Total recoil energy deposited:  "<< toterecoil<< std::endl;
 
-   return 0;
    outfile.close();
+
+  std::ofstream integraloutfile;
+  outfilename = "sns_diff_rates-"+std::string(jsonfile)+"-"+material+"-"+ffname+"-integral.out";
+
+  std::cout << outfilename << std::endl;
+  integraloutfile.open(outfilename);
+
+  
+  integraloutfile << j << '\n';
+  integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
+
+  integraloutfile.close();
+  return 0;
+
+
 }
 
 
