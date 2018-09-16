@@ -9,14 +9,24 @@
   Zs["H1"] = 1;
   Zs["H2"] = 1;
 
+  Zs["He3"] = 2;
+  Zs["He4"] = 2;
+
   Zs["C12"] = 6;
   Zs["C13"] = 6;
+
+  Zs["F19"] = 9;
 
   Zs["Ne20"]= 10;
   Zs["Ne21"]= 10;
   Zs["Ne22"]= 10;
 
   Zs["Na23"]= 11;
+
+  Zs["S32"] = 16;
+  Zs["S33"] = 16;
+  Zs["S34"] = 16;
+  Zs["S36"] = 16;
 
   Zs["Ar36"]= 18;
   Zs["Ar38"]= 18;
@@ -45,14 +55,24 @@
   Ns["H1"] = 0;
   Ns["H2"] = 1;
 
+  Ns["He3"] = 1;
+  Ns["He4"] = 2;
+
   Ns["C12"] = 6;
   Ns["C13"] = 7;
+
+  Ns["F19"] = 10;
 
   Ns["Ne20"]= 10;
   Ns["Ne21"]= 11;
   Ns["Ne22"]= 12;
 
   Ns["Na23"]= 12;
+
+  Ns["S32"] = 16;
+  Ns["S33"] = 17;
+  Ns["S34"] = 18;
+  Ns["S36"] = 20;
 
   Ns["Ar36"]= 18;
   Ns["Ar38"]= 20;
@@ -79,15 +99,28 @@
   Ns["Cs133"]= 78;
 
 
+  Deltas["H1"] = 7.2889;
+  Deltas["H2"] = 13.1357;
+
+  Deltas["He3"] = 14.9312;
+  Deltas["He4"] = 2.4249;
+
   Deltas["C12"] = 0;
   Deltas["C13"] = 3.125;
 
+  Deltas["F19"] = -1.4874;
 
   Deltas["Ne20"]= -7.02;
   Deltas["Ne21"]= -5.731;
   Deltas["Ne22"]= -8.024;
 
   Deltas["Na23"]= -9.530;
+
+  Deltas["S32"] = -26.0155;
+  Deltas["S33"] = -26.5858;
+  Deltas["S34"] = -29.9316;
+  Deltas["S36"] = -30.6641;
+
 
   Deltas["Ar36"]= -30.231;
   Deltas["Ar38"]= -34.714;
@@ -117,14 +150,24 @@
   Zdiffs["H1"] = 1;
   Zdiffs["H2"] = 1;
 
+  Zdiffs["He3"] = 0;
+  Zdiffs["He4"] = 0;
+
   Zdiffs["C12"] = 0;
   Zdiffs["C13"] = 0;
+
+  Zdiffs["F19"] = 1;
 
   Zdiffs["Ne20"]= 0;
   Zdiffs["Ne21"]= 0;
   Zdiffs["Ne22"]= 0;
 
   Zdiffs["Na23"]= 1;
+
+  Zdiffs["S32"] = 0;
+  Zdiffs["S33"] = 0;
+  Zdiffs["S34"] = 0;
+  Zdiffs["S36"] = 0;
 
   Zdiffs["Ar36"]= 0;
   Zdiffs["Ar38"]= 0;
@@ -153,14 +196,25 @@
   Ndiffs["H1"] = 0;
   Ndiffs["H2"] = 1;
 
+  Ndiffs["He3"] = 1;
+  Ndiffs["He4"] = 0;
+
   Ndiffs["C12"] = 0;
   Ndiffs["C13"] = 1;
+
+  Zdiffs["F19"] = 0;
 
   Ndiffs["Ne20"]= 0;
   Ndiffs["Ne21"]= 1;
   Ndiffs["Ne22"]= 0;
 
   Ndiffs["Na23"]= 0;
+
+  Ndiffs["S32"] = 0;
+  Ndiffs["S33"] = 1;
+  Ndiffs["S34"] = 0;
+  Ndiffs["S36"] = 0;
+
 
   Ndiffs["Ar36"]= 0;
   Ndiffs["Ar38"]= 0;

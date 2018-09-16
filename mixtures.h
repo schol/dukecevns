@@ -9,6 +9,16 @@ double me=0.511;
 
 double mass_fraction[max_components];
 
+  isotopes["He"].push_back("He3");
+  molar_fraction["He"].push_back(0.00000134);
+  isotopes["He"].push_back("He4");
+  molar_fraction["He"].push_back(0.99999866);
+
+
+  isotopes["He4"].push_back("He4");
+  molar_fraction["He4"].push_back(1.0);
+
+
   isotopes["scint"].push_back("H1");
   molar_fraction["scint"].push_back(0.66659);
   isotopes["scint"].push_back("H2");
@@ -65,6 +75,29 @@ double mass_fraction[max_components];
   isotopes["Na23"].push_back("Na23");
   molar_fraction["Na23"].push_back(1.0);
 
+
+////
+
+  isotopes["SF6"].push_back("S32");
+  molar_fraction["SF6"].push_back(0.1357);
+  isotopes["SF6"].push_back("S33");
+  molar_fraction["SF6"].push_back(0.00107143);
+  isotopes["SF6"].push_back("S34");
+  molar_fraction["SF6"].push_back(0.00607143);
+  isotopes["SF6"].push_back("S36");
+  molar_fraction["SF6"].push_back(0.000142857);
+  isotopes["SF6"].push_back("F19");
+  molar_fraction["SF6"].push_back(0.857143);
+
+///
+/// Just take dominant S component.  20 torr SF6, 740 torr He
+
+  isotopes["SF6He"].push_back("S32");
+  molar_fraction["SF6He"].push_back(0.0227273);
+  isotopes["SF6He"].push_back("F19");
+  molar_fraction["SF6He"].push_back(0.136364);
+  isotopes["SF6He"].push_back("He4");
+  molar_fraction["SF6He"].push_back(0.840909);
 
 ///
 
