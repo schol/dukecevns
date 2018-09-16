@@ -38,31 +38,80 @@ double diffxscninterf(double knu, double mass, double erec) {
 
 void sm_vector_couplings(int pdgyear, double* gv) {
 
-  // Default is 2015 PDG, from Erler paper
+  // Default is 2015 PDG, from Erler and Su paper.  This is for mu flavor
 
-  double gVp = 0.0298;
+  // This is subtracting the charge radius correction for the 
+  // proton coupling; these are values in the table for mu flavor,
+  // and include -phinulWmu*2 (factor of 2 for V=L+R)= 
+  // correction only for proton
+
+  //  double chgradcorr = 2.*0.00571903;
+
+    // For no charge radius correction
+  //double gVp = 0.0298-chgradcorr;
+
+  double gVp = 0.01836;
   double gVn= -0.5117;
 
-  if (pdgyear < 2015) {
-   double Szhat2 = 0.23875;
-   double rhoNeuNucNC = 1.0086;
-   double khatNeuNuc = 0.9978;
-   double lambdaUL = -0.0031;
-   double lambdaDL = -0.0025;
-   double lambdaDR = 7.5e-5;
-   double lambdaUR = lambdaDR/2.0;
 
-
-   gVp = rhoNeuNucNC*(0.5 - 2.0 * khatNeuNuc * Szhat2) + 2.0*lambdaUL + 2.0*lambdaUR + lambdaDL + lambdaDR;
-
-   gVn = -0.5*rhoNeuNucNC + lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
-
+  if (pdgyear < 2011){
+    gVp = 0.0304;
+    gVn = -0.5122;
   }
+
+  if (pdgyear >= 2011 && pdgyear < 2012){
+    gVp = 0.0306;
+    gVn = -0.5120;
+  }
+
+  if (pdgyear >= 2012 && pdgyear < 2014){
+    gVp = 0.0307;
+    gVn = -0.5120;
+  }
+  
+
+//   if (pdgyear < 2015) {
+//     //   double Szhat2 = 0.23875;
+//     double Szhat2 = 0.23120;
+//     double rhoNeuNucNC = 1.0086;
+//     double khatNeuNuc = 0.9978;
+//     double lambdaUL = -0.0031;
+//     double lambdaDL = -0.0025;
+//     double lambdaDR = 7.5e-5;
+//     double lambdaUR = lambdaDR/2.0;
+
+
+//    gVp = rhoNeuNucNC*(0.5 - 2.0 * khatNeuNuc * Szhat2) + 2.0*lambdaUL + 2.0*lambdaUR + lambdaDL + lambdaDR;
+
+//    //      gVn = -0.5*rhoNeuNucNC + 2.*lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
+
+//       gVn = -0.5*rhoNeuNucNC +  lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
+
+//   }
 
   gv[0] = gVp;
   gv[1] = gVn;
   
 
+}
+
+
+double chgradcorr(int flavor) {
+
+  // Correction to PDG from Erler
+  double gvpcorr = 0.;
+  flavor = fabs(flavor);
+  if (flavor == 1) {
+    gvpcorr = 0.0196964;
+  } else if (flavor == 2) {
+    gvpcorr = 0.0114381;
+  }
+  else if (flavor == 3) {
+    gvpcorr = 0.00706633;
+  }
+
+  return gvpcorr;
+ 
 }
 
 void sm_axial_couplings(int pdgyear, int flav, double* ga) {
@@ -83,13 +132,29 @@ void sm_axial_couplings(int pdgyear, int flav, double* ga) {
 
   // Actually I don't know where the 1.27 comes from-- Phil's paper
 
-  if (pdgyear < 2015) {
+  if (pdgyear < 2004) {
     double dS = -0.15;
     
     gAp = (1.27-dS)/2.*flav/fabs(flav);
     gAn = -(1.27-dS)/2.*flav/fabs(flav);
     
   }
+
+  if (pdgyear >= 2004 && pdgyear < 2011){
+    gAp = 0.4955;
+    gAn = -0.5125;
+  }
+
+  if (pdgyear >= 2011 && pdgyear < 2012){
+    gAp = 0.4942;
+    gAn = -0.5123;
+  }
+
+  if (pdgyear >= 2012 && pdgyear < 2014){
+    gAp = 0.4953;
+    gAn = -0.5124;
+  }
+
 
   ga[0] = gAp;
   ga[1] = gAn;
@@ -122,7 +187,7 @@ double GA_SM(int pdgyear, int flav, int Z, int N, int Zdiff, int Ndiff){
 
 }
 
-// These are from poly fit to Seghal paper charge ratios.  Not quite right at very low Q, take const value at 0.1
+// These are from poly fit to Seghal paper charge ratios.  Not quite right at very low Q, take const value at 0.1.. It's wrt electron
 
 double mufactor(double Q) {
 
