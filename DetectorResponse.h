@@ -24,11 +24,13 @@ class DetectorResponse
   std::vector<double> polycoeff;
   double polyrange[2]; // Range of validity for polynomial
 
+  // For a step-function threshold in MeVr
+
+  double step_thresh=0.;
+
   // For efficiency in numerical format
   std::map<double,double> _efficmap;
   char efficfilename[80];
-
-
 
  public: 
   DetectorResponse();
@@ -64,6 +66,8 @@ class DetectorResponse
   double efficnum(double);
   double maxEfficErec();
 
+  void SetStepThresh(double);
+  double GetStepThresh();
 
 };
 

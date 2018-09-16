@@ -23,7 +23,7 @@ double Helm::FFval(double Q)
 {
 
   double ff = 1;
-  //  double R = 1.14*pow(A,1./3.);
+  //double R = 1.14*pow(A,1./3.);
   double R = 1.2*pow(A,1./3.);
 
   // This is for varying Rn but keeping sval fixed (will distort the shape

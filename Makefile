@@ -109,6 +109,16 @@ sns_rates.o:
 	$(CXX) -o sns_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c sns_rates.cc
 
 
+xscnvsN: xscnvsN.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: xscnvsN.o
+xscnvsN.o: 
+	$(CXX) -o xscnvsN.o $(ROOTCFLAGS) $(CXXFLAGS) -c xscnvsN.cc
+
+
 
 check_xscn: check_xscn.o $(libdiffspec) 
 	$(RM) $@

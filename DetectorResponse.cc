@@ -272,4 +272,14 @@ double DetectorResponse::maxEfficErec()
 
 }
 
+
+void DetectorResponse::SetStepThresh(double thresh) {
+
+  step_thresh = thresh;
+ 
+}
+
+double DetectorResponse::GetStepThresh() { return step_thresh;}
+
+
 /////// 
