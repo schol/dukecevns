@@ -19,7 +19,7 @@ using json = nlohmann::json;
 
 #include "xscns.h"
 
-void get_flavor_weight(double,double,double*, double*, double*);
+void get_flavor_weight(int, double,double,double*, double*, double*);
 // Check the CsI calculation
 
 int main(int argc, char * argv[] )
@@ -49,8 +49,6 @@ int main(int argc, char * argv[] )
 #include "isomaps.h"
   // Info for relevant mixtures
 #include "mixtures.h"
-
-
 	
 
   // Flavor weighting from file
@@ -59,13 +57,23 @@ int main(int argc, char * argv[] )
   double wnumubar=1.;
   double wnue=1.;
 
+  int convolved=0;
+
+  // Can't seem to do this with a nested key easily; make convolved not nested
+  if (j.find("convolved") != j.end()) {
+      convolved = j["convolved"];
+  }
+  std::cout << "Convolved "<<convolved<<std::endl;
 
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
   //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
 
   double tw1 = j["timewindow"]["start"];
   double tw2 = j["timewindow"]["end"];
-  get_flavor_weight(tw1,tw2,&wnumu,&wnumubar,&wnue);
+  get_flavor_weight(convolved,tw1,tw2,&wnumu,&wnumubar,&wnue);
+
+  //  wnumu*=1.037;
+  //wnumubar*=1.037;
 
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
@@ -291,15 +299,15 @@ int main(int argc, char * argv[] )
       ffna[is] = horowitzffna;
 
       Horowitz* horowitzffpv = new Horowitz();
-      ffnv[is] = horowitzffpv;
+      ffpv[is] = horowitzffpv;
 
       Horowitz* horowitzffpa = new Horowitz();
-      ffna[is] = horowitzffpa;
+      ffpa[is] = horowitzffpa;
 
 
       std::transform(isoname.begin(), isoname.end(),isoname.begin(), ::toupper);
       std::string horowitz_filename = isoname+".FF";
-      //      std::cout << horowitz_filename << std::endl;
+      std::cout << horowitz_filename << std::endl;
       horowitzffnv->SetFFfilename(horowitz_filename.c_str());
       horowitzffnv->ReadFFfile();
       horowitzffnv->SetRfac(nvrfact);
@@ -314,9 +322,11 @@ int main(int argc, char * argv[] )
       horowitzffpv->ReadFFfile();
       horowitzffpv->SetRfac(pvrfact);
 
+
       horowitzffpa->SetFFfilename(horowitz_filename.c_str());
       horowitzffpa->ReadFFfile();
       horowitzffpa->SetRfac(parfact);
+
 
     }
 
@@ -479,6 +489,7 @@ int main(int argc, char * argv[] )
 	 double knumin = 0.5*(Erec+sqrt(Erec*Erec+2*M*Erec));
 	 double hbarc = 197.327; // MeV-fm, convert for Q in MeV for ff
 	 double Q = sqrt(2*M*Erec+Erec*Erec); // MeV
+	 //	 double Q = sqrt(2*M*Erec); // MeV
 
 	 double qq = Q/hbarc;
 	 //    double ff2 = helmff->FFval(qq);
