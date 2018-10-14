@@ -53,8 +53,12 @@ void sm_vector_couplings(int pdgyear, double* gv) {
   double gVp = 0.01836;
   double gVn= -0.5117;
 
+  if (pdgyear < 2004){
+    gVp = 0.0152;
+    gVn = -0.5122;
+  }
 
-  if (pdgyear < 2011){
+  if (pdgyear >= 2004 && pdgyear < 2011){
     gVp = 0.0304;
     gVn = -0.5122;
   }
@@ -137,22 +141,22 @@ void sm_axial_couplings(int pdgyear, int flav, double* ga) {
     
     gAp = (1.27-dS)/2.*flav/fabs(flav);
     gAn = -(1.27-dS)/2.*flav/fabs(flav);
-    
+
   }
 
   if (pdgyear >= 2004 && pdgyear < 2011){
-    gAp = 0.4955;
-    gAn = -0.5125;
+    gAp = 0.4955*flav/fabs(flav);
+    gAn = -0.5125*flav/fabs(flav);
   }
 
   if (pdgyear >= 2011 && pdgyear < 2012){
-    gAp = 0.4942;
-    gAn = -0.5123;
+    gAp = 0.4942*flav/fabs(flav);
+    gAn = -0.5123*flav/fabs(flav);
   }
 
   if (pdgyear >= 2012 && pdgyear < 2014){
-    gAp = 0.4953;
-    gAn = -0.5124;
+    gAp = 0.4953*flav/fabs(flav);
+    gAn = -0.5124*flav/fabs(flav);
   }
 
 
