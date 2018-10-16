@@ -13,8 +13,9 @@ double PiDAR::fluxval(double Enu, int flavor, double ebinsize)
 
   // Energies in MeV
   // 1 = e, 2 = mu
-  //  const double mmu = 105.6;
+  //const double mmu = 105.6;
   const double mmu = 105.66837;
+  //  const double Enumu = 29.9;
   const double Enumu = 29.792;
 
   const double a= 2/mmu;
@@ -52,7 +53,7 @@ double PiDAR::maxEnu()
   // Return the maximum energy in MeV
 
   // To compare with old
-  //double maxEnu = 105.6/2.;
+  //  double maxEnu = 105.6/2.;
   double maxEnu = 105.66837/2.;
   return maxEnu;
 

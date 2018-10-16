@@ -11,7 +11,7 @@ void sm_axial_couplings(int, int, double*);
 double GV_SM(int,int, int);
 double GA_SM(int,int, int, int, int, int);
 
-double chgradcorr(int);
+double chgradcorr(int,int);
 double mufactor(double);
 double taufactor(double);
 

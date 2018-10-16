@@ -72,9 +72,9 @@ double Klein::FFval(double Q)
  
   double ff = 1;
 
-  //  double R2 = 1.14*pow(A,1./3.);
+  // double R2 = 1.14*pow(A,1./3.);
 
-  double R2 = 1.2*pow(A,1./3.)+skinfac*1.01*(double(A)-2.*Z)/double(A);
+     double R2 = 1.2*pow(A,1./3.)+skinfac*1.01*(double(A)-2.*Z)/double(A);
 
   // This scales the radius by Rfac
   Q *= Rfac;

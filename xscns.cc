@@ -50,7 +50,8 @@ void sm_vector_couplings(int pdgyear, double* gv) {
     // For no charge radius correction
   //double gVp = 0.0298-chgradcorr;
 
-  double gVp = 0.01836;
+  // This is for Giunti couplings
+  double gVp = 0.0227;
   double gVn= -0.5117;
 
   if (pdgyear < 2004){
@@ -72,7 +73,11 @@ void sm_vector_couplings(int pdgyear, double* gv) {
     gVp = 0.0307;
     gVn = -0.5120;
   }
-  
+
+  if (pdgyear >= 2014 && pdgyear < 2020){
+     gVp = 0.01836;
+     gVn= -0.5117;
+  }
 
 //   if (pdgyear < 2015) {
 //     //   double Szhat2 = 0.23875;
@@ -100,18 +105,36 @@ void sm_vector_couplings(int pdgyear, double* gv) {
 }
 
 
-double chgradcorr(int flavor) {
+double chgradcorr(int flavor, int type) {
 
-  // Correction to PDG from Erler
   double gvpcorr = 0.;
   flavor = fabs(flavor);
-  if (flavor == 1) {
-    gvpcorr = 0.0196964;
-  } else if (flavor == 2) {
-    gvpcorr = 0.0114381;
-  }
-  else if (flavor == 3) {
-    gvpcorr = 0.00706633;
+
+  if (type == 1) {
+  // Correction to PDG from Erler
+    if (flavor == 1) {
+      gvpcorr = 0.0196964;
+    } else if (flavor == 2) {
+      gvpcorr = 0.0114381;
+    }
+    else if (flavor == 3) {
+      gvpcorr = 0.00706633;
+    }
+
+  } else if (type == 2) {
+
+    // Giunti corrections
+
+    if (flavor == 1) {
+      gvpcorr = -0.0108251;
+    } else if (flavor == 2) {
+      gvpcorr = -0.00633633;
+    }
+    else if (flavor == 3) {
+      gvpcorr = -0.00396039;
+    }
+
+
   }
 
   return gvpcorr;

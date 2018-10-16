@@ -532,11 +532,19 @@ int main(int argc, char * argv[] )
 	double GV_sm_wff_tau= GV_sm_wff;
 
 	if  (j["couplings"]["chargeradiusfactor"] == "erler") {
-	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3))*ffpvval+Nn*gv[1]*ffnvval;
-	  
+	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,1))*ffpvval+Nn*gv[1]*ffnvval;
+
 	}
+
+	if  (j["couplings"]["chargeradiusfactor"] == "giunti") {
+	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,2))*ffpvval+Nn*gv[1]*ffnvval;
+	}
+
+
 
 	 // Normalize for one ton of material
 	 // Will be weighted by mass fraction

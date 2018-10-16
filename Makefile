@@ -108,6 +108,27 @@ sns_rates: sns_rates.o $(libdiffspec)
 sns_rates.o: 
 	$(CXX) -o sns_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c sns_rates.cc
 
+reactor_rates: reactor_rates.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: reactor_rates.o
+reactor_rates.o: 
+	$(CXX) -o reactor_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c reactor_rates.cc
+
+
+
+formfactors: formfactors.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: formfactors.o
+formfactors.o: 
+	$(CXX) -o formfactors.o $(ROOTCFLAGS) $(CXXFLAGS) -c formfactors.cc
+
+
 
 xscnvsN: xscnvsN.o $(libdiffspec) 
 	$(RM) $@
