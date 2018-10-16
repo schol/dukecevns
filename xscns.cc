@@ -108,6 +108,7 @@ void sm_vector_couplings(int pdgyear, double* gv) {
 double chgradcorr(int flavor, int type) {
 
   double gvpcorr = 0.;
+  int sign = fabs(flavor)/flavor;
   flavor = fabs(flavor);
 
   if (type == 1) {
@@ -126,16 +127,21 @@ double chgradcorr(int flavor, int type) {
     // Giunti corrections
 
     if (flavor == 1) {
-      gvpcorr = -0.0108251;
+      //      gvpcorr = -0.0108251;
+      gvpcorr = 0.02191;
     } else if (flavor == 2) {
-      gvpcorr = -0.00633633;
+      //      gvpcorr = -0.00633633;
+      gvpcorr = 0.01267;
     }
     else if (flavor == 3) {
-      gvpcorr = -0.00396039;
+      //      gvpcorr = -0.00396039;
+      gvpcorr = 0.00792;
     }
 
+    // Opposite sign for antineutrinos
 
   }
+  gvpcorr *=sign;
 
   return gvpcorr;
  

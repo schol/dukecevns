@@ -528,20 +528,29 @@ int main(int argc, char * argv[] )
 	 }	   
 
 	double GV_sm_wff_e=GV_sm_wff;
+	double GV_sm_wff_ebar=GV_sm_wff;
 	double GV_sm_wff_mu=GV_sm_wff;
+	double GV_sm_wff_mubar=GV_sm_wff;
 	double GV_sm_wff_tau= GV_sm_wff;
+	double GV_sm_wff_taubar= GV_sm_wff;
 
 	if  (j["couplings"]["chargeradiusfactor"] == "erler") {
 	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_ebar= Z*(gv[0]+chgradcorr(-1,1))*ffpvval+Nn*gv[1]*ffnvval;
 	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_mubar= Z*(gv[0]+chgradcorr(-2,1))*ffpvval+Nn*gv[1]*ffnvval;
 	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,1))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_taubar= Z*(gv[0]+chgradcorr(-3,1))*ffpvval+Nn*gv[1]*ffnvval;
 
 	}
 
 	if  (j["couplings"]["chargeradiusfactor"] == "giunti") {
 	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_ebar= Z*(gv[0]+chgradcorr(-1,2))*ffpvval+Nn*gv[1]*ffnvval;
 	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_mubar= Z*(gv[0]+chgradcorr(-2,2))*ffpvval+Nn*gv[1]*ffnvval;
 	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,2))*ffpvval+Nn*gv[1]*ffnvval;
+	  GV_sm_wff_taubar= Z*(gv[0]+chgradcorr(-3,2))*ffpvval+Nn*gv[1]*ffnvval;
 	}
 
 
@@ -621,11 +630,11 @@ int main(int argc, char * argv[] )
 
 
 	 diffrate_e_vec[is] += ntfac*pow(GV_sm_wff_e,2)*mass_fraction[is]*drate_e_vec*wnue;
-	 diffrate_ebar_vec[is] += ntfac*pow(GV_sm_wff_e,2)*mass_fraction[is]*drate_ebar_vec;
+	 diffrate_ebar_vec[is] += ntfac*pow(GV_sm_wff_ebar,2)*mass_fraction[is]*drate_ebar_vec;
 	 diffrate_mu_vec[is] += ntfac*pow(GV_sm_wff_mu,2)*mass_fraction[is]*drate_mu_vec*mufact*wnumu;
-	 diffrate_mubar_vec[is] += ntfac*pow(GV_sm_wff_mu,2)*mass_fraction[is]*drate_mubar_vec*mufact*wnumubar;
+	 diffrate_mubar_vec[is] += ntfac*pow(GV_sm_wff_mubar,2)*mass_fraction[is]*drate_mubar_vec*mufact*wnumubar;
 	 diffrate_tau_vec[is] +=  ntfac*pow(GV_sm_wff_tau,2)*mass_fraction[is]*drate_tau_vec;
-	 diffrate_taubar_vec[is] += ntfac*pow(GV_sm_wff_tau,2)*mass_fraction[is]*drate_taubar_vec;
+	 diffrate_taubar_vec[is] += ntfac*pow(GV_sm_wff_taubar,2)*mass_fraction[is]*drate_taubar_vec;
 
 
 	 diffrate_e_axial[is] += ntfac*pow(GA_sm_wff,2)*mass_fraction[is]*drate_e_axial*wnue;
@@ -636,12 +645,12 @@ int main(int argc, char * argv[] )
 	 diffrate_taubar_axial[is] +=  ntfac*pow(GA_sm_bar_wff,2)*mass_fraction[is]*drate_taubar_axial;
 
 
-	 diffrate_e_interf[is] += ntfac*GV_sm_wff*GA_sm_wff*mass_fraction[is]*drate_e_interf*wnue;
-	 diffrate_ebar_interf[is] += ntfac*GV_sm_wff*GA_sm_bar_wff*mass_fraction[is]*drate_ebar_interf;
-	 diffrate_mu_interf[is] += ntfac*GV_sm_wff*GA_sm_wff*mass_fraction[is]*drate_mu_interf*mufact*wnumu;
-	 diffrate_mubar_interf[is] += ntfac*GV_sm_wff*GA_sm_bar_wff*mass_fraction[is]*drate_mubar_interf*mufact*wnumubar;
-	 diffrate_tau_interf[is] +=  ntfac*GV_sm_wff*GA_sm_wff*mass_fraction[is]*drate_tau_interf;
-	 diffrate_taubar_interf[is] +=  ntfac*GV_sm_wff*GA_sm_bar_wff*mass_fraction[is]*drate_taubar_interf;
+	 diffrate_e_interf[is] += ntfac*GV_sm_wff_e*GA_sm_wff*mass_fraction[is]*drate_e_interf*wnue;
+	 diffrate_ebar_interf[is] += ntfac*GV_sm_wff_ebar*GA_sm_bar_wff*mass_fraction[is]*drate_ebar_interf;
+	 diffrate_mu_interf[is] += ntfac*GV_sm_wff_mu*GA_sm_wff*mass_fraction[is]*drate_mu_interf*mufact*wnumu;
+	 diffrate_mubar_interf[is] += ntfac*GV_sm_wff_mubar*GA_sm_bar_wff*mass_fraction[is]*drate_mubar_interf*mufact*wnumubar;
+	 diffrate_tau_interf[is] +=  ntfac*GV_sm_wff_tau*GA_sm_wff*mass_fraction[is]*drate_tau_interf;
+	 diffrate_taubar_interf[is] +=  ntfac*GV_sm_wff_taubar*GA_sm_bar_wff*mass_fraction[is]*drate_taubar_interf;
 
 	  // Now add the contribution from this isotope to the sum
 	  
