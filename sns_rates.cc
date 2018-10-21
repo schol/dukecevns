@@ -181,7 +181,6 @@ int main(int argc, char * argv[] )
   // Quenching filename info
   std::string qfname = j["detectorresponse"]["qfname"];
 
-
   int is=0;
   std::vector<std::string>::iterator v = isotope_component.begin();
   std::string isotope;
@@ -753,7 +752,7 @@ int main(int argc, char * argv[] )
 	toterecoil += events*Erec*erecstep;
 
 	// Increment bin for quenching
-	// One would write out separate quenched components here
+	
 	iq++;
 
   } // End of loop over Erec
@@ -762,7 +761,6 @@ int main(int argc, char * argv[] )
    std::cout << "Total recoil energy deposited:  "<< toterecoil<< std::endl;
 
    outfile.close();
-
 
 
   std::ofstream integraloutfile;
@@ -822,6 +820,120 @@ int main(int argc, char * argv[] )
     
     }
     allisooutfile.close();
+
+
+    // Now dump the quenched output, by isotope.  This has non-uniform Eee energy bins.  At the same time fill some maps to be interpolated for a sum, and get the maximum quenched energy for use for that/
+
+    // Don't have this broken down by flavor and interaction... need to do that
+
+    if (qfname != "none") {
+
+      double maxee = 0;
+      // One of these per component
+      std::map<double, double> _quenchedmap[max_components];
+
+      // The total response
+      std::map<double, double> _quenchedtot;
+
+      v = isotope_component.begin();
+      // Now loop over components
+      is=0;
+      while( v != isotope_component.end()) {
+	
+	isotope = *v;
+	//	  std::cout << "isotope"<< isotope << std::endl;
+	std::string isoname = std::string(isotope);
+	
+	std::ofstream qisooutfile;
+	outfilename = "out/sns_diff_rates_quenched-"+std::string(jsonfile)+"-"+material+"-"+ffname+"-"+isoname+".out";
+	
+	std::cout << outfilename << std::endl;
+	qisooutfile.open(outfilename);
+	
+	int ie;
+	for (ie=0;ie<iq;ie++) {
+	  
+	  if (Eee[is][ie]>maxee) {maxee = Eee[is][ie];}
+	  qisooutfile << Eee[is][ie]<< "  "<<dNdEee[is][ie]<<std::endl;
+	  _quenchedmap[is][Eee[is][ie]] = dNdEee[is][ie];
+
+	}
+	qisooutfile.close();
+	v++;is++;
+      }
+
+
+      // Now interpolated rates for quenched, summed over components
+
+      std::ofstream qoutfile;
+      outfilename = "out/sns_diff_rates_quenched-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+	
+      std::cout << outfilename << std::endl;
+      qoutfile.open(outfilename);
+
+      // Fixed number of steps in quenched energy
+      int  ieee = 0;
+      int numeeestep = 100;
+      double eeestep = maxee/numeeestep;
+      double eee = 0;
+      double dndeee=0.;
+      
+      for (ieee=0;ieee<numeeestep;ieee++) {
+	
+	eee += eeestep;
+	_quenchedtot[eee] = 0.;
+
+	// Now loop over components
+	v = isotope_component.begin();
+
+	is=0;
+	while( v != isotope_component.end()) {
+	  
+	  isotope = *v;
+	  //	  std::cout << "isotope"<< isotope << std::endl;
+	  std::string isoname = std::string(isotope);
+	  
+	  // Interpolate dNdEee value for isotope is, at this eee
+	  // Should encapsulate this in an interpolation routine
+
+	  typedef std::map<double, double>::const_iterator i_t;
+
+	  i_t i=_quenchedmap[is].upper_bound(eee);
+	  if(i==_quenchedmap[is].end())
+	    {
+	      return (--i)->second;
+	    }
+	  if (i==_quenchedmap[is].begin())
+	    {
+	      return i->second;
+	    }
+	  i_t l=i; --l;
+	  
+	  const double delta=(eee- l->first)/(i->first - l->first);
+	  dndeee= delta*i->second +(1-delta)*l->second;
+	  
+	  if (isnan(dndeee)) {dndeee=0.;}
+	  
+	  _quenchedtot[eee] += dndeee;
+
+	  v++;is++;
+
+	} // End of loop over components
+
+
+      // Now output the total quenched output, per MeVee
+	qoutfile << eee<<" "<<_quenchedtot[eee]<<std::endl;
+
+
+      } // End of loop over Eee
+
+      qoutfile.close();
+
+
+    // Now do Gaussian smearing, if requested.  Quenching must be requested also
+
+
+    }  // End of do-quenching case
 
 
   return 0;
