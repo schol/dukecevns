@@ -105,13 +105,13 @@ void DetectorResponse::ReadQFPolyFile() {
     std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
-    qfpolyfile >> polyrange[0]>>polyrange[1];
+    qfpolyfile >> qfpolyrange[0]>>qfpolyrange[1];
 
     while(! qfpolyfile.eof() ) 
       {
 	qfpolyfile>>coeff;
         if (! qfpolyfile.eof()) {
-	  polycoeff.push_back(coeff);
+	  qfpolycoeff.push_back(coeff);
         }
       }
   }
@@ -125,9 +125,9 @@ double DetectorResponse::qfpoly(double erec) {
 
   // erec in MeV
   double qf=0;
-  if (erec>=polyrange[0]  && erec<=polyrange[1] ) {
-    for (int i=0; i<polycoeff.size();i++) {
-      qf += polycoeff[i]*pow(erec,i);
+  if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
+    for (int i=0; i<qfpolycoeff.size();i++) {
+      qf += qfpolycoeff[i]*pow(erec,i);
     }
   }
 
@@ -141,9 +141,9 @@ double DetectorResponse::qfpolyderiv(double erec) {
 
   // erec in MeV
   double qfderiv = 0;
-  if (erec>=polyrange[0]  && erec<=polyrange[1] ) {
-    for (int i=0; i<polycoeff.size();i++) {
-      qfderiv += (i+1)*polycoeff[i]*pow(erec,i);
+  if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
+    for (int i=0; i<qfpolycoeff.size();i++) {
+      qfderiv += (i+1)*qfpolycoeff[i]*pow(erec,i);
     }
   }
 
@@ -160,14 +160,80 @@ const char * DetectorResponse::GetQFPolyFilename() {
 }
 
 
-void DetectorResponse::SetPolyRange(double* range) {
+void DetectorResponse::SetQFPolyRange(double* range) {
 
-  polyrange[0] = range[0];
-  polyrange[1] = range[1];
+  qfpolyrange[0] = range[0];
+  qfpolyrange[1] = range[1];
 
 }
 
-double* DetectorResponse::GetPolyRange() { return polyrange;}
+double* DetectorResponse::GetQFPolyRange() { return qfpolyrange;}
+
+// For Gaussian smearing
+
+// Polynomial GS-related methods
+
+void DetectorResponse::ReadGSPolyFile() {
+
+  double coeff;
+  std::ifstream gspolyfile;
+  std::string filename = gspolyfilename;
+  gspolyfile.open(filename.c_str());
+  if (!gspolyfile) {
+    std::cout << "File "<<filename<<" does not exist!" <<std::endl;
+    exit(-1);
+  } else {
+    gspolyfile >> gspolyrange[0]>>gspolyrange[1];
+
+    while(! gspolyfile.eof() ) 
+      {
+	gspolyfile>>coeff;
+        if (! gspolyfile.eof()) {
+	  gspolycoeff.push_back(coeff);
+        }
+      }
+  }
+
+  gspolyfile.close();
+
+}
+
+
+double DetectorResponse::gspoly(double en) {
+
+  // returns the sigma as a function of energy (usually Eee)
+
+  // erec in MeV
+  double gs=0;
+  if (en>=gspolyrange[0]  && en<=gspolyrange[1] ) {
+    for (int i=0; i<gspolycoeff.size();i++) {
+      gs += gspolycoeff[i]*pow(en,i);
+    }
+  }
+
+  return gs;
+} 
+
+
+
+void DetectorResponse::SetGSPolyFilename(const char * fname) {
+  strcpy(gspolyfilename, fname);
+}
+
+const char * DetectorResponse::GetGSPolyFilename() {
+  return gspolyfilename;
+}
+
+
+void DetectorResponse::SetGSPolyRange(double* range) {
+
+  gspolyrange[0] = range[0];
+  gspolyrange[1] = range[1];
+
+}
+
+double* DetectorResponse::GetGSPolyRange() { return gspolyrange;}
+
 
 
 // Generic methods

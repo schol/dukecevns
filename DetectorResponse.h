@@ -21,8 +21,15 @@ class DetectorResponse
 
   // For QF in polynomial format
   char qfpolyfilename[80];
-  std::vector<double> polycoeff;
-  double polyrange[2]; // Range of validity for polynomial
+  std::vector<double> qfpolycoeff;
+  double qfpolyrange[2]; // Range of validity for polynomial
+
+
+  // For Gaussian smearing in polynomial format
+  char gspolyfilename[80];
+  std::vector<double> gspolycoeff;
+  double gspolyrange[2]; // Range of validity for polynomial
+
 
   // For a step-function threshold in MeVr
 
@@ -47,16 +54,26 @@ class DetectorResponse
   double qfnum(double);
   double maxErec();
 
-
   // For QF in polynomial format
-  void SetPolyRange(double*);
-  double* GetPolyRange();
+  void SetQFPolyRange(double*);
+  double* GetQFPolyRange();
 
   void SetQFPolyFilename(const char * qfpolyfilename);
   const char * GetQFPolyFilename();
   void ReadQFPolyFile();
   double qfpoly(double);
   double qfpolyderiv(double);
+
+
+  // For Gaussian smearing in polynomial format
+  void SetGSPolyRange(double*);
+  double* GetGSPolyRange();
+
+  void SetGSPolyFilename(const char * gspolyfilename);
+  const char * GetGSPolyFilename();
+  void ReadGSPolyFile();
+  double gspoly(double);
+
 
   // For efficiency as a function of Erec, file in numerical format
 
