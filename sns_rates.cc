@@ -901,11 +901,11 @@ int main(int argc, char * argv[] )
 	  i_t i=_quenchedmap[is].upper_bound(eee);
 	  if(i==_quenchedmap[is].end())
 	    {
-	      return (--i)->second;
+	      dndeee = (--i)->second;
 	    }
 	  if (i==_quenchedmap[is].begin())
 	    {
-	      return i->second;
+	      dndeee =  i->second;
 	    }
 	  i_t l=i; --l;
 	  
@@ -931,6 +931,23 @@ int main(int argc, char * argv[] )
 
 
     // Now do Gaussian smearing, if requested.  Quenching must be requested also
+
+      // First retrieve the smearing
+      std::string gsname = j["detectorresponse"]["gsname"];
+
+      if (gsname != "none") {
+	std::string gsfilename;
+	gsfilename = "gs/"+std::string(gsname)+"_gs.txt";
+	
+	DetectorResponse* gs = new DetectorResponse();
+	gs->SetGSPolyFilename(gsfilename.c_str());
+	gs->ReadGSPolyFile();
+
+      // Now create a new smeared spectrum
+
+	double sigma = gs->gspoly(0.01);
+
+      }
 
 
     }  // End of do-quenching case
