@@ -73,7 +73,17 @@ class DetectorResponse
   const char * GetGSPolyFilename();
   void ReadGSPolyFile();
   double gspoly(double);
+  std::map<double,double> Smear(std::map<double,double>);
+  int NEeeBin;
+  void SetNEeeBin(int);
+  int GetNEeeBin();
 
+  double maxEee;
+  void SetMaxEee(double);
+  double GetMaxEee();
+  double** SmearingMatrix;
+  // Not bothering to clean this up with a delete method, I'm a bad person
+  void SetGaussSmearingMatrix();
 
   // For efficiency as a function of Erec, file in numerical format
 
