@@ -873,7 +873,7 @@ int main(int argc, char * argv[] )
 
       // Fixed number of steps in quenched energy
       int  ieee = 0;
-      int numeeestep = 100;
+      const int numeeestep = 100;
       double eeestep = maxee/numeeestep;
       double eee = 0;
       double dndeee=0.;
@@ -932,10 +932,13 @@ int main(int argc, char * argv[] )
 
     // Now do Gaussian smearing, if requested.  Quenching must be requested also
 
-      // First retrieve the smearing
+      // First retrieve the smearing function, which should have Gaussian sigma as a function of Eee
       std::string gsname = j["detectorresponse"]["gsname"];
 
       if (gsname != "none") {
+
+	std::map<double,double> _smearedmap;
+
 	std::string gsfilename;
 	gsfilename = "gs/"+std::string(gsname)+"_gs.txt";
 	
@@ -943,12 +946,93 @@ int main(int argc, char * argv[] )
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
 
-      // Now create a new smeared spectrum
+	// Now create a new smeared spectrum
+	// Use the same stepping as for the quenched
+	
+      // Output the smeared file
 
-	double sigma = gs->gspoly(0.01);
+	std::ofstream smoutfile;
+	outfilename = "out/sns_diff_rates_smeared-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+	
+	std::cout << outfilename << std::endl;
+	smoutfile.open(outfilename);
 
-      }
+	// Make a smearing matrix
+	// Do a binned normalization for each column, or else subject to binning effects and edge effects, and won't be unitary
 
+	double smearmat[numeeestep][numeeestep];
+
+	double eeei=0.;
+	double eeej=0.;
+	int ieee, jeee;
+
+	for (ieee=0;ieee<numeeestep;ieee++) {
+	  eeei += eeestep;
+
+	  eeej = 0.;
+	  for (jeee=0;jeee<numeeestep;jeee++) {
+	    eeej += eeestep;
+	    double sigma = gs->gspoly(eeej)*eeej;
+	    smearmat[ieee][jeee] = exp(-pow(eeei-eeej,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
+
+	    }
+
+	    if (isnan(smearmat[ieee][jeee]) ) {smearmat[ieee][jeee] = 0.;}
+	    
+	} // End of loop over rows
+
+
+	// Now normalize over rows in a given column
+
+	for (jeee=0;jeee<numeeestep;jeee++) {
+
+	  double totincolumn = 0.;
+	  for (ieee=0;ieee<numeeestep;ieee++) {
+	    totincolumn += smearmat[ieee][jeee];
+	  }
+
+	  for (ieee=0;ieee<numeeestep;ieee++) {
+	    if (totincolumn>0) {
+	      smearmat[ieee][jeee] /= totincolumn;
+	    } else {
+	      smearmat[ieee][jeee] = 0.;
+	    }
+	  }
+	} // End of normalizing
+	
+
+
+	// For norm check
+	double totsmeared = 0;
+	double totunsmeared = 0;
+
+	// Now do the smearing
+	eeei=0.;
+
+	for (ieee=0;ieee<numeeestep;ieee++) {
+	
+	  eeei += eeestep;
+	  _smearedmap[eeei] = 0.;
+	  eeej = 0;
+	  for (jeee=0;jeee<numeeestep;jeee++) {
+	  
+	    eeej += eeestep;
+	    _smearedmap[eeei]  +=   _quenchedtot[eeej]*smearmat[ieee][jeee];
+	    //	    std::cout << ieee<<" "<<jeee<<" "<< eeei<<" "<<eeej<<" "<<_quenchedtot[eeej]<<" "<<smearmat[ieee][jeee]<<std::endl;
+
+	  } // End of loop over columns for this row
+	  
+	  totunsmeared += _quenchedtot[eeei];
+	  totsmeared += _smearedmap[eeei];
+
+	  smoutfile << eeei<<" "<<_smearedmap[eeei]<<std::endl;
+
+	} // End of loop over rows
+
+	smoutfile.close();
+
+	std::cout << "Total smeared events: "<<totsmeared*eeestep<<" unsmeared "<<totunsmeared*eeestep<<std::endl;
+      } // End of do-smearing case
 
     }  // End of do-quenching case
 
