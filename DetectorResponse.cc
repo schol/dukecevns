@@ -173,6 +173,16 @@ double* DetectorResponse::GetQFPolyRange() { return qfpolyrange;}
 
 // Polynomial GS-related methods
 
+
+void DetectorResponse::SetGSType(int type) {
+  gstype = type;
+}
+
+int DetectorResponse::GetGSType() {
+  return gstype;
+}
+
+
 void DetectorResponse::ReadGSPolyFile() {
 
   double coeff;
@@ -277,8 +287,17 @@ void DetectorResponse::SetGaussSmearingMatrix() {
     eeej = 0.;
     for (jeee=0;jeee<NEeeBin;jeee++) {
       eeej += eeestep;
-      double sigma = this->gspoly(eeej)*eeej;
+      double sigma;
+      if (gstype == 1) {
+	sigma = this->gspoly(eeej)*eeej;
+      } else if (gstype == 2) {
+	sigma = sqrt(this->gspoly(eeej));
+      }
+
+
+      std::cout << eeej<<" "<<sigma<<" "<<this->gspoly(eeej)<<std::endl;
       SmearingMatrix[ieee][jeee] = exp(-pow(eeei-eeej,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
+
       
     }
 

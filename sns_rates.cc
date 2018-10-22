@@ -935,6 +935,7 @@ int main(int argc, char * argv[] )
     // Now do Gaussian smearing, if requested.  Quenching must be requested also if this is to be invoked
 
       // First retrieve the smearing function, which should have Gaussian sigma as a function of Eee
+      std::string gstype = j["detectorresponse"]["gstype"];
       std::string gsname = j["detectorresponse"]["gsname"];
 
       if (gsname != "none") {
@@ -942,8 +943,18 @@ int main(int argc, char * argv[] )
 	// Read the smearing parameters from the file and set them
 	std::string gsfilename;
 	gsfilename = "gs/"+std::string(gsname)+"_gs.txt";
-	
+
 	DetectorResponse* gs = new DetectorResponse();
+
+	if (gstype == "polyfrac") {
+	  gs->SetGSType(1);
+	} else if (gstype == "polysqrt") {
+	  gs->SetGSType(2);
+	} else {
+	  std::cout << "Need to provide a smearing type" <<std::endl;
+	  exit(0);
+	}
+
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
 

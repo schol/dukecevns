@@ -65,7 +65,12 @@ class DetectorResponse
   double qfpolyderiv(double);
 
 
-  // For Gaussian smearing in polynomial format
+  // For Gaussian smearing in polynomial formats
+
+  int gstype;
+  void SetGSType(int);
+  int GetGSType();
+
   void SetGSPolyRange(double*);
   double* GetGSPolyRange();
 
@@ -74,9 +79,11 @@ class DetectorResponse
   void ReadGSPolyFile();
   double gspoly(double);
   std::map<double,double> Smear(std::map<double,double>);
+
   int NEeeBin;
   void SetNEeeBin(int);
   int GetNEeeBin();
+
 
   double maxEee;
   void SetMaxEee(double);
