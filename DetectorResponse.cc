@@ -294,8 +294,7 @@ void DetectorResponse::SetGaussSmearingMatrix() {
 	sigma = sqrt(this->gspoly(eeej));
       }
 
-
-      std::cout << eeej<<" "<<sigma<<" "<<this->gspoly(eeej)<<std::endl;
+      //      std::cout << eeej<<" "<<sigma<<" "<<this->gspoly(eeej)<<std::endl;
       SmearingMatrix[ieee][jeee] = exp(-pow(eeei-eeej,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
 
       
