@@ -1,8 +1,8 @@
 // Mixtures.  Assume add up to 100
 
 const int max_components = 15;
-double amu = 931.414;
-double me=0.511;
+double amu = 931.4940955;
+double me=0.51099895;
 
   std::map<std::string, std::vector<std::string>> isotopes;
   std::map<std::string, std::vector<double>> molar_fraction;
