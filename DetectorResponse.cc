@@ -244,7 +244,6 @@ void DetectorResponse::SetGSPolyRange(double* range) {
 
 double* DetectorResponse::GetGSPolyRange() { return gspolyrange;}
 
-
 void DetectorResponse::SetMaxEee(double maxeee) {
   maxEee = maxeee;
 }
@@ -262,107 +261,191 @@ int DetectorResponse::GetNEeeBin() {
 }
 
 
+void DetectorResponse::SetMaxSmearEn(double maxsmearen) {
+  maxSmearEn = maxsmearen;
+}
+
+double DetectorResponse::GetMaxSmearEn() {
+  return maxSmearEn;
+}
+
+
+void DetectorResponse::SetNSmearBin(int nsmearbin) {
+  NSmearBin = nsmearbin;
+}
+
+int DetectorResponse::GetNSmearBin() {
+  return NSmearBin;
+}
+
+
 void DetectorResponse::SetGaussSmearingMatrix() {
 
-	// Use the same stepping as for the quenched.  Should make these parameters.
-	
-	// Make a smearing matrix... eventually make this a member object of the DetectorResponse instance
 	// Do a binned normalization for each column, or else it's subject to binning effects and edge effects, and won't be unitary
 
 
-   SmearingMatrix = new double*[NEeeBin];
-   for(int i = 0; i < NEeeBin; ++i) {
-    SmearingMatrix[i] = new double[NEeeBin];
+   SmearingMatrix = new double*[NSmearBin];
+   for(int i = 0; i < NSmearBin; ++i) {
+    SmearingMatrix[i] = new double[NSmearBin];
    }
 
-  double eeei=0.;
-  double eeej=0.;
-  int ieee, jeee;
+  double eni=0.;
+  double enj=0.;
+  int ien, jen;
 
-  double eeestep = maxEee/NEeeBin;
+  double enstep = maxSmearEn/NSmearBin;
      
-  for (ieee=0;ieee<NEeeBin;ieee++) {
-    eeei += eeestep;
+  for (ien=0;ien<NSmearBin;ien++) {
+    eni += enstep;
     
-    eeej = 0.;
-    for (jeee=0;jeee<NEeeBin;jeee++) {
-      eeej += eeestep;
+    enj = 0.;
+    for (jen=0;jen<NSmearBin;jen++) {
+      enj += enstep;
       double sigma;
       if (gstype == 1) {
-	sigma = this->gspoly(eeej)*eeej;
+	sigma = this->gspoly(enj)*enj;
       } else if (gstype == 2) {
-	sigma = sqrt(this->gspoly(eeej));
+	sigma = sqrt(this->gspoly(enj));
+      } else {
+	std::cout << "Unknown smearing type; please set gstype "<<std::endl;
+	exit(1);
       }
 
-      //      std::cout << eeej<<" "<<sigma<<" "<<this->gspoly(eeej)<<std::endl;
-      SmearingMatrix[ieee][jeee] = exp(-pow(eeei-eeej,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
+
+      SmearingMatrix[ien][jen] = exp(-pow(eni-enj,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
 
       
     }
 
-    if (isnan(SmearingMatrix[ieee][jeee]) ) {SmearingMatrix[ieee][jeee] = 0.;}
+    if (isnan(SmearingMatrix[ien][jen]) ) {SmearingMatrix[ien][jen] = 0.;}
 	    
   } // End of loop over rows
 
 
   // Now normalize over rows in a given column
 
-  for (jeee=0;jeee<NEeeBin;jeee++) {
+  for (jen=0;jen<NSmearBin;jen++) {
     
     double totincolumn = 0.;
-    for (ieee=0;ieee<NEeeBin;ieee++) {
-      totincolumn += SmearingMatrix[ieee][jeee];
+    for (ien=0;ien<NSmearBin;ien++) {
+      totincolumn += SmearingMatrix[ien][jen];
     }
 
-    for (ieee=0;ieee<NEeeBin;ieee++) {
+    for (ien=0;ien<NSmearBin;ien++) {
       if (totincolumn>0) {
-	SmearingMatrix[ieee][jeee] /= totincolumn;
+	SmearingMatrix[ien][jen] /= totincolumn;
       } else {
-	SmearingMatrix[ieee][jeee] = 0.;
+	SmearingMatrix[ien][jen] = 0.;
       }
     }
   } // End of normalizing
 
 }
 
+
+void DetectorResponse::SetPoissonSmearingMatrix() {
+
+	// Do a binned normalization for each column, or else it's subject to binning effects and edge effects, and won't be unitary
+
+
+   SmearingMatrix = new double*[NSmearBin];
+   for(int i = 0; i < NSmearBin; ++i) {
+    SmearingMatrix[i] = new double[NSmearBin];
+   }
+
+  double pei=0.;
+  double pej=0.;
+  int ipe, jpe;
+
+  double pestep = maxSmearEn/NSmearBin; // to synch with Smear method 
+     
+  for (ipe=0;ipe<NSmearBin;ipe++) {
+    pei += pestep;
+    
+    pej = 0.;
+    for (jpe=0;jpe<NSmearBin;jpe++) {
+      pej += pestep;
+
+      // Get the Poisson prob for pei given mean pej
+
+      double poissprob;
+      double lnfact = 0.;
+      for (int j=0;j<=int(pei)-1;j++)
+	{
+	  lnfact += log(float(int(pei)-j));
+	}
+
+      double temp1 = int(pei)*log(pej)-lnfact;
+      double temp2 = exp(temp1);
+      poissprob = temp2*exp(-1.*pej);
+
+      SmearingMatrix[ipe][jpe] = poissprob;
+      
+    }
+
+    if (isnan(SmearingMatrix[ipe][jpe]) ) {SmearingMatrix[ipe][jpe] = 0.;}
+	    
+  } // End of loop over rows
+
+
+  // Now normalize over rows in a given column
+
+  for (jpe=0;jpe<NSmearBin;jpe++) {
+    
+    double totincolumn = 0.;
+    for (ipe=0;ipe<NSmearBin;ipe++) {
+      totincolumn += SmearingMatrix[ipe][jpe];
+    }
+
+    for (ipe=0;ipe<NSmearBin;ipe++) {
+      if (totincolumn>0) {
+	SmearingMatrix[ipe][jpe] /= totincolumn;
+      } else {
+	SmearingMatrix[ipe][jpe] = 0.;
+      }
+    }
+  } // End of normalizing
+
+}
+
+
+
 std::map<double, double> DetectorResponse::Smear(std::map<double,double> _unsmeared) {
 
-
   std::map<double,double> _smeared = _unsmeared;
-
-  
+ 
   // For norm check
   double totsmeared = 0;
   double totunsmeared = 0;
 
 	// Do the smearing
 
-  double eeestep = maxEee/NEeeBin;
+  double enstep = maxSmearEn/NSmearBin;
 
-  int ieee, jeee;
-  double eeei=0.;
+  int ien, jen;
+  double eni=0.;
 
 
-  for (ieee=0;ieee<NEeeBin;ieee++) {
+  for (ien=0;ien<NSmearBin;ien++) {
     
-    eeei += eeestep;
-    _smeared[eeei] = 0.;
-    double eeej = 0;
-    for (jeee=0;jeee<NEeeBin;jeee++) {
+    eni += enstep;
+    _smeared[eni] = 0.;
+    double enj = 0;
+    for (jen=0;jen<NSmearBin;jen++) {
 	  
-      eeej += eeestep;
-      _smeared[eeei]  +=   _unsmeared[eeej]*SmearingMatrix[ieee][jeee];
-	    //	    std::cout << ieee<<" "<<jeee<<" "<< eeei<<" "<<eeej<<" "<<_quenchedtot[eeej]<<" "<<SmearingMatrix[ieee][jeee]<<std::endl;
+      enj += enstep;
+      _smeared[eni]  +=   _unsmeared[enj]*SmearingMatrix[ien][jen];
+      //      std::cout << maxSmearEn<<" "<<NSmearBin<<" "<<enstep<<" "<<ien<<" "<<jen<<" "<< eni<<" "<<enj<<" "<<_unsmeared[enj]<<" "<<SmearingMatrix[ien][jen]<<std::endl;
 
     } // End of loop over columns for this row
 	  
-    totunsmeared += _unsmeared[eeei];
-    totsmeared += _smeared[eeei];
+    totunsmeared += _unsmeared[eni];
+    totsmeared += _smeared[eni];
 
 
   } // End of loop over rows
 
-	std::cout << "Total smeared events: "<<totsmeared*eeestep<<" unsmeared "<<totunsmeared*eeestep<<std::endl;
+  	std::cout << "Total smeared events: "<<totsmeared*enstep<<" unsmeared "<<totunsmeared*enstep<<std::endl;
 
   return _smeared;
 
@@ -379,11 +462,11 @@ DetectorResponse::DetectorResponse(const char * type)
 }
 
 
-void DetectorResponse::Setdetectortype(const char * type) {
+void DetectorResponse::SetDetectorType(const char * type) {
   strcpy(detectortype, type);
 }
 
-const char * DetectorResponse::Getdetectortype() {
+const char * DetectorResponse::GetDetectorType() {
   return detectortype;
 }
 
@@ -417,7 +500,7 @@ void DetectorResponse::ReadEfficFile()
 
 ////
 
-double DetectorResponse::efficnum(double erec) 
+double DetectorResponse::efficnum(double en) 
 {
   double effic = 1;
 
@@ -429,7 +512,7 @@ double DetectorResponse::efficnum(double erec)
 
   //  std::map<double, double> _efficmap;
   
-  i_t i=_efficmap.upper_bound(erec);
+  i_t i=_efficmap.upper_bound(en);
 
   if(i==_efficmap.end())
     {
@@ -441,7 +524,7 @@ double DetectorResponse::efficnum(double erec)
     }
   i_t l=i; --l;
   
-  const double delta=(erec- l->first)/(i->first - l->first);
+  const double delta=(en- l->first)/(i->first - l->first);
   effic= delta*i->second +(1-delta)*l->second;
 
   if (isnan(effic)) {effic=0.;}
@@ -449,6 +532,16 @@ double DetectorResponse::efficnum(double erec)
   return effic;
 
 }
+
+void DetectorResponse::SetEfficType(const char * etype) {
+  strcpy(efftype, etype);
+}
+
+const char * DetectorResponse::GetEfficType() {
+  return efftype;
+}
+
+
 
 void DetectorResponse::SetEfficFilename(const char * fname) {
   strcpy(efficfilename, fname);

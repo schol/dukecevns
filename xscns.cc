@@ -79,24 +79,24 @@ void sm_vector_couplings(int pdgyear, double* gv) {
      gVn= -0.5117;
   }
 
-//   if (pdgyear < 2015) {
-//     //   double Szhat2 = 0.23875;
-//     double Szhat2 = 0.23120;
-//     double rhoNeuNucNC = 1.0086;
-//     double khatNeuNuc = 0.9978;
-//     double lambdaUL = -0.0031;
-//     double lambdaDL = -0.0025;
-//     double lambdaDR = 7.5e-5;
-//     double lambdaUR = lambdaDR/2.0;
+//    if (pdgyear < 2015) {
+//      double Szhat2 = 0.23875;
+//      //     double Szhat2 = 0.23120;
+//      double rhoNeuNucNC = 1.0086;
+//      double khatNeuNuc = 0.9978;
+//      double lambdaUL = -0.0031;
+//      double lambdaDL = -0.0025;
+//      double lambdaDR = 7.5e-5;
+//      double lambdaUR = lambdaDR/2.0;
 
 
-//    gVp = rhoNeuNucNC*(0.5 - 2.0 * khatNeuNuc * Szhat2) + 2.0*lambdaUL + 2.0*lambdaUR + lambdaDL + lambdaDR;
+//     gVp = rhoNeuNucNC*(0.5 - 2.0 * khatNeuNuc * Szhat2) + 2.0*lambdaUL + 2.0*lambdaUR + lambdaDL + lambdaDR;
 
-//    //      gVn = -0.5*rhoNeuNucNC + 2.*lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
+// //    //      gVn = -0.5*rhoNeuNucNC + 2.*lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
 
-//       gVn = -0.5*rhoNeuNucNC +  lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
+//        gVn = -0.5*rhoNeuNucNC +  lambdaUL + lambdaUR + 2.0*lambdaDL + 2.0*lambdaDR;
 
-//   }
+//    }
 
   gv[0] = gVp;
   gv[1] = gVn;

@@ -20,7 +20,7 @@ using json = nlohmann::json;
 #include "xscns.h"
 
 void get_flavor_weight(int, double,double,double*, double*, double*);
-// Check the CsI calculation
+
 
 int main(int argc, char * argv[] )
 {
@@ -126,7 +126,11 @@ int main(int argc, char * argv[] )
   DetectorResponse* detresp = new DetectorResponse();
 
   double recoilthresh = 0.; //MeVr
+  double eethresh = 0.; //MeVr
+  double pethresh = 0.; //pe
 
+  std::string eff_type = j["detectorresponse"]["efftype"];
+  detresp->SetEfficType(eff_type.c_str());
   
   std::string eff_filename = j["detectorresponse"]["efficiencyfile"];
   std::cout << "eff_filename: "<<eff_filename<<std::endl;
@@ -134,8 +138,17 @@ int main(int argc, char * argv[] )
     detresp->SetEfficFilename(eff_filename.c_str());
     detresp->ReadEfficFile();
   } else {
-    recoilthresh = j["detectorresponse"]["stepthresh"];
-    detresp->SetStepThresh(recoilthresh); // Not actually needed
+    if (eff_type == "erecoil") {
+      recoilthresh = j["detectorresponse"]["stepthresh"];
+      detresp->SetStepThresh(recoilthresh); // Not actually needed
+    } else if (eff_type == "eee") {
+      eethresh = j["detectorresponse"]["stepthresh"];
+      detresp->SetStepThresh(eethresh); 
+    } else if (eff_type == "pe") {
+      pethresh = j["detectorresponse"]["stepthresh"];
+      detresp->SetStepThresh(pethresh); 
+    } 
+
   }
 
 
@@ -449,15 +462,15 @@ int main(int argc, char * argv[] )
      
      // With efficiency, which is a function of Erec in MeV in this formuation
      
-     double eff_factor = 1;
-     if (eff_filename != "none") {
-       eff_factor = detresp->efficnum(Erec);
+     double recoil_eff_factor = 1;
+     if (eff_filename != "none" && eff_type == "erecoil") {
+       recoil_eff_factor = detresp->efficnum(Erec);
      }
      
      //     double eff_factor = 1.;
-     std::cout << "eff factor "<<eff_factor<<std::endl;
+     std::cout << "recoil eff factor "<<recoil_eff_factor<<std::endl;
      // Skip if too small contribution
-     if (eff_factor>0.0001) {
+     if (recoil_eff_factor>0.0001) {
 	  
 
        v = isotope_component.begin();
@@ -654,26 +667,26 @@ int main(int argc, char * argv[] )
 	  // Now add the contribution from this isotope to the sum
 	  
 
-	 sum_diffrate_e_vec += diffrate_e_vec[is]*norm_factor*eff_factor;
-	 sum_diffrate_ebar_vec += diffrate_ebar_vec[is]*norm_factor*eff_factor;
-	 sum_diffrate_mu_vec += diffrate_mu_vec[is]*norm_factor*eff_factor;
-	 sum_diffrate_mubar_vec += diffrate_mubar_vec[is]*norm_factor*eff_factor;
-	 sum_diffrate_tau_vec += diffrate_tau_vec[is]*norm_factor*eff_factor;
-	 sum_diffrate_taubar_vec += diffrate_taubar_vec[is]*norm_factor*eff_factor;
+	 sum_diffrate_e_vec += diffrate_e_vec[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_ebar_vec += diffrate_ebar_vec[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mu_vec += diffrate_mu_vec[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mubar_vec += diffrate_mubar_vec[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_tau_vec += diffrate_tau_vec[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_taubar_vec += diffrate_taubar_vec[is]*norm_factor*recoil_eff_factor;
 	 
-	 sum_diffrate_e_axial += diffrate_e_axial[is]*norm_factor*eff_factor;
-	 sum_diffrate_ebar_axial += diffrate_ebar_axial[is]*norm_factor*eff_factor;
-	 sum_diffrate_mu_axial += diffrate_mu_axial[is]*norm_factor*eff_factor;
-	 sum_diffrate_mubar_axial += diffrate_mubar_axial[is]*norm_factor*eff_factor;
-	 sum_diffrate_tau_axial += diffrate_tau_axial[is]*norm_factor*eff_factor;
-	 sum_diffrate_taubar_axial += diffrate_taubar_axial[is]*norm_factor*eff_factor;
+	 sum_diffrate_e_axial += diffrate_e_axial[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_ebar_axial += diffrate_ebar_axial[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mu_axial += diffrate_mu_axial[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mubar_axial += diffrate_mubar_axial[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_tau_axial += diffrate_tau_axial[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_taubar_axial += diffrate_taubar_axial[is]*norm_factor*recoil_eff_factor;
 	  
-	 sum_diffrate_e_interf += diffrate_e_interf[is]*norm_factor*eff_factor;
-	 sum_diffrate_ebar_interf += diffrate_ebar_interf[is]*norm_factor*eff_factor;
-	 sum_diffrate_mu_interf += diffrate_mu_interf[is]*norm_factor*eff_factor;
-	 sum_diffrate_mubar_interf += diffrate_mubar_interf[is]*norm_factor*eff_factor;
-	 sum_diffrate_tau_interf += diffrate_tau_interf[is]*norm_factor*eff_factor;
-	 sum_diffrate_taubar_interf += diffrate_taubar_interf[is]*norm_factor*eff_factor;
+	 sum_diffrate_e_interf += diffrate_e_interf[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_ebar_interf += diffrate_ebar_interf[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mu_interf += diffrate_mu_interf[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mubar_interf += diffrate_mubar_interf[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_tau_interf += diffrate_tau_interf[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_taubar_interf += diffrate_taubar_interf[is]*norm_factor*recoil_eff_factor;
 
 
 	  // Sum for this Erec and isotope
@@ -683,7 +696,7 @@ int main(int argc, char * argv[] )
 
 	  sum_events_iso+= diffrate_e_interf[is] + diffrate_ebar_interf[is] + diffrate_mu_interf[is]+ diffrate_mubar_interf[is]+ diffrate_tau_interf[is] + diffrate_taubar_interf[is];
 
-	  sum_events_iso *= norm_factor*eff_factor;
+	  sum_events_iso *= norm_factor*recoil_eff_factor;
 
 	  // Now apply the quenching for this Ee and isotope component
 	// sum_events_iso is dNderec
@@ -821,6 +834,7 @@ int main(int argc, char * argv[] )
     }
     allisooutfile.close();
 
+    ////////////  QUENCHED  RESPONSE ///////////////
 
     // Now dump the quenched output, by isotope.  This has non-uniform Eee energy bins.  At the same time fill some maps to be interpolated for a sum, and get the maximum quenched energy for use for that/
 
@@ -838,6 +852,7 @@ int main(int argc, char * argv[] )
       v = isotope_component.begin();
       // Now loop over components
       is=0;
+
       while( v != isotope_component.end()) {
 	
 	isotope = *v;
@@ -862,7 +877,6 @@ int main(int argc, char * argv[] )
 	v++;is++;
       }
 
-
       // Now interpolated rates for quenched, summed over components
 
       std::ofstream qoutfile;
@@ -879,6 +893,9 @@ int main(int argc, char * argv[] )
       double eeestep = maxeee/neeebin;
       double eee = 0;
       double dndeee=0.;
+
+      double nquenchedtot=0;
+
       
       for (ieee=0;ieee<neeebin;ieee++) {
 	
@@ -904,16 +921,15 @@ int main(int argc, char * argv[] )
 	  if(i==_quenchedmap[is].end())
 	    {
 	      dndeee = (--i)->second;
-	    }
-	  if (i==_quenchedmap[is].begin())
+	    } else if (i==_quenchedmap[is].begin()) 
 	    {
 	      dndeee =  i->second;
-	    }
-	  i_t l=i; --l;
+	    } else {
+	    i_t l=i; --l;
 	  
-	  const double delta=(eee- l->first)/(i->first - l->first);
-	  dndeee= delta*i->second +(1-delta)*l->second;
-	  
+	    const double delta=(eee- l->first)/(i->first - l->first);
+	    dndeee= delta*i->second +(1-delta)*l->second;
+	  }	    
 	  if (isnan(dndeee)) {dndeee=0.;}
 	  
 	  _quenchedtot[eee] += dndeee;
@@ -922,9 +938,13 @@ int main(int argc, char * argv[] )
 
 	} // End of loop over components
 
+	
 
       // Now output the total quenched output, per MeVee
 	qoutfile << eee<<" "<<_quenchedtot[eee]<<std::endl;
+
+	nquenchedtot += _quenchedtot[eee]*eeestep;
+
 
 
       } // End of loop over Eee
@@ -932,13 +952,17 @@ int main(int argc, char * argv[] )
       qoutfile.close();
 
 
-    // Now do Gaussian smearing, if requested.  Quenching must be requested also if this is to be invoked
+      std::cout << "Total quenched: "<<nquenchedtot<<std::endl;
+
+
+    // Now do Gaussian smearing, if requested.  Quenching must be requested also if this is to be invoked.  Apply also efficiency here
 
       // First retrieve the smearing function, which should have Gaussian sigma as a function of Eee
-      std::string gstype = j["detectorresponse"]["gstype"];
       std::string gsname = j["detectorresponse"]["gsname"];
 
       if (gsname != "none") {
+	
+	std::string gstype = j["detectorresponse"]["gstype"];
 
 	// Read the smearing parameters from the file and set them
 	std::string gsfilename;
@@ -958,8 +982,8 @@ int main(int argc, char * argv[] )
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
 
-	gs->SetMaxEee(maxeee);
-	gs->SetNEeeBin(neeebin);
+	gs->SetMaxSmearEn(maxeee);
+	gs->SetNSmearBin(neeebin);
 	gs->SetGaussSmearingMatrix();
 
 	// Do the smearing
@@ -976,9 +1000,17 @@ int main(int argc, char * argv[] )
 	double eeei=0.;
 
 	for (ieee=0;ieee<neeebin;ieee++) {
-	
-	  eeei += eeestep;
-	  smoutfile << eeei<<" "<<_smearedmap[eeei]<<std::endl;
+
+	  // Apply the Eee efficiency here, if requested
+
+	  double eee_eff_factor = 1.;
+	  if (eeei>=eethresh) {
+	    if (eff_filename != "none" && eff_type == "eee"){
+	      eee_eff_factor = detresp->efficnum(eeei);	    
+	    }
+	    eeei += eeestep;
+	    smoutfile << eeei<<" "<<_smearedmap[eeei]*eee_eff_factor<<std::endl;
+	  }
 	}
 
 	smoutfile.close();
@@ -986,6 +1018,115 @@ int main(int argc, char * argv[] )
 
       } // End of do-smearing case
 
+    ////////////  PE-LEVEL RESPONSE ///////////////
+    // For this, require quenching also
+
+      // In principle this can be a nonlinear response function... linear for now
+      double peperkeVee = j["detectorresponse"]["peperkeVee"];
+
+      // The total pe distribution (all components... could break it out by isotope)
+      std::map<double, double> _pemapall;
+      //Eee in MeVee
+
+      double peperMeVee = peperkeVee*1000.;
+      double maxpe = maxeee*peperMeVee;
+
+      // Loop over pe's, as integers
+
+      int ipe;
+      double pe;
+      for (ipe=0;ipe<=int(maxpe);ipe++) {
+
+	double dndpe;
+	// Interpolate dNdpe from the quenchedmap
+
+	pe = double(ipe);
+
+
+	typedef std::map<double, double>::const_iterator i_t;
+
+	double mevee = pe/peperMeVee;
+
+
+	i_t i=_quenchedtot.upper_bound(mevee);
+
+
+	if(i==_quenchedtot.end())
+	  {
+	    dndpe = (--i)->second;
+	  }
+	else if (i==_quenchedtot.begin())
+	  {
+	    dndpe =  i->second;
+
+	  } else {
+	  
+	    i_t l=i; --l;
+
+	    const double delta=(mevee- l->first)/(i->first - l->first);
+	    dndpe= delta*i->second +(1-delta)*l->second;
+
+	  }
+	dndpe /= peperMeVee;
+	  
+	if (isnan(dndpe)) {dndpe=0.;}
+	  
+	_pemapall[pe] = dndpe;
+
+	//	std::cout << "pemapall "<< maxpe<<" "<<ipe<<" "<<pe<<" "<<dndpe<<" "<<peperMeVee<<" "<<mevee<<" "<<_pemapall[pe]<<std::endl;
+
+
+
+      }
+
+      // Do the Poisson pe smearing if requested
+
+      DetectorResponse* ps = new DetectorResponse();
+	
+      ps->SetNSmearBin(int(maxpe));
+      ps->SetMaxSmearEn(double(int(maxpe)));
+      ps->SetPoissonSmearingMatrix();
+
+	// Do the smearing
+      std::map<double,double> _smearedpemap = ps->Smear(_pemapall);
+     
+      
+      // Output the pe distribution, applying efficiency if requested
+      // (should not also have recoil or quenched efficiency)
+
+	std::ofstream peoutfile;
+	outfilename = "out/sns_diff_rates_pe-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+	
+	std::cout << outfilename << std::endl;
+	peoutfile.open(outfilename);
+	
+	double totev = 0.;
+	double totevunsmeared = 0.;
+
+	for (ipe=0;ipe<=int(maxpe);ipe++) {
+
+	  // Apply the pe efficiency here, if requested
+
+	  pe = double(ipe);
+	  double pe_eff_factor = 1.;
+
+	  if (ipe>=pethresh) {
+	    if (eff_filename != "none" && eff_type == "pe"){
+	      pe_eff_factor = detresp->efficnum(pe);	    
+	    }
+
+	    peoutfile << ipe <<" "<<_smearedpemap[pe]*pe_eff_factor<<" "<<_pemapall[pe]<<std::endl;
+	    // It's events per pe bin
+	    totev += _smearedpemap[pe]*pe_eff_factor;
+	    totevunsmeared += _pemapall[pe]*pe_eff_factor;
+	  }
+	}
+
+
+	peoutfile.close();
+
+
+	cout << "Total events: "<<totev<<" unsmeared "<<totevunsmeared<<endl;
     }  // End of do-quenching case
 
 

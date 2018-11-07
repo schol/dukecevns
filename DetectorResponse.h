@@ -30,6 +30,8 @@ class DetectorResponse
   std::vector<double> gspolycoeff;
   double gspolyrange[2]; // Range of validity for polynomial
 
+  // Efficiency type:  recoil or electron-equivalent
+  char efftype[80];
 
   // For a step-function threshold in MeVr
 
@@ -44,8 +46,8 @@ class DetectorResponse
   DetectorResponse(const char *);
   ~DetectorResponse(){};
 
-  void Setdetectortype(const char *);
-  const char * Getdetectortype();
+  void SetDetectorType(const char *);
+  const char * GetDetectorType();
 
   // For QF in numerical format
   void SetQFFilename(const char * qffilename);
@@ -88,11 +90,26 @@ class DetectorResponse
   double maxEee;
   void SetMaxEee(double);
   double GetMaxEee();
+
+
+  double maxSmearEn;
+  void SetMaxSmearEn(double);
+  double GetMaxSmearEn();
+
+  int NSmearBin;
+  void SetNSmearBin(int);
+  int GetNSmearBin();
+
+
   double** SmearingMatrix;
   // Not bothering to clean this up with a delete method, I'm a bad person
   void SetGaussSmearingMatrix();
+  void SetPoissonSmearingMatrix();
 
   // For efficiency as a function of Erec, file in numerical format
+
+  void SetEfficType(const char *);
+  const char * GetEfficType();
 
   void SetEfficFilename(const char * efficfilename);
   const char * GetEfficFilename();
