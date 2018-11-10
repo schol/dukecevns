@@ -1029,8 +1029,10 @@ int main(int argc, char * argv[] )
       //Eee in MeVee
 
       double peperMeVee = peperkeVee*1000.;
-      double maxpe = maxeee*peperMeVee;
+      double maxmeanpe = maxeee*peperMeVee;
+      double maxpe = maxeee*peperMeVee*2; // for smearing matrix
 
+      //      std::cout << "maxpe "<<maxpe<<" maxmeanpe "<<maxmeanpe<<std::endl;
       // Loop over pe's, as integers
 
       int ipe;
@@ -1042,64 +1044,73 @@ int main(int argc, char * argv[] )
 
 	// Interpolate dNdpe from the quenchedmap
 
-	pe = double(ipe);
+	if (pe<=maxmeanpe+0.01) {
+	  pe = double(ipe);
 
 
-	typedef std::map<double, double>::const_iterator i_t;
-
-	double mevee = pe/peperMeVee;
-
-	// Do a more fine-grained interpolation and integrate over pe bin,
-	// to reduce binned integration error
-
-	double fracpe;
-	double pestep = 0.1;
-
-	double dndpeinbin=0.;
-	double dndpeinterp;
-	double dndpe;
-
-	// if <pe+0.5 includes last point
-	for (fracpe=pe-0.5;fracpe<pe+0.49;fracpe+=pestep) {
-	  if (fracpe>0) {
-
-	    double mevee2 = fracpe/peperMeVee;
-
-	    i_t i=_quenchedtot.upper_bound(mevee2);
-
-	    if(i==_quenchedtot.end())
-	      {
-		dndpe = (--i)->second;
-	      }
-	    else if (i==_quenchedtot.begin())
-	      {
-		dndpe =  i->second;
-		
-	      } else {
-	    
-	      i_t l=i; --l;
-	    
-	      const double delta=(mevee2- l->first)/(i->first - l->first);
-	      dndpe = delta*i->second +(1-delta)*l->second;
-	    }
-	    dndpeinbin += dndpe*pestep; 
-
-	    //	    std::cout <<pe <<" "<<fracpe<<" "<<mevee2<<" "<<dndpe*pestep<<" "<<dndpeinbin<<std::endl;
-
-	  } // End of >0 pe case
-
-	} // End of loop over fractional pe integration
-	//	std::cout <<pe <<" "<<mevee<<" "<<dndpeinbin<<std::endl;
-
-	
-	dndpeinterp = dndpeinbin/peperMeVee;
+	  typedef std::map<double, double>::const_iterator i_t;
 	  
-	if (isnan(dndpeinterp)) {dndpeinterp=0.;}
+	  double mevee = pe/peperMeVee;
+	  
+	  // Do a more fine-grained interpolation and integrate over pe bin,
+	  // to reduce binned integration error
 
-	//	if (pe>0) {
+	  double fracpe;
+	  double pestep = 0.1;
+	  
+	  double dndpeinbin=0.;
+	  double dndpeinterp;
+	  double dndpe;
+	  
+	  // if <pe+0.5 includes last point
+	  for (fracpe=pe-0.5;fracpe<pe+0.49;fracpe+=pestep) {
+	    if (fracpe>0) {
+	      
+	      double mevee2 = fracpe/peperMeVee;
+	      
+	      i_t i=_quenchedtot.upper_bound(mevee2);
+	      
+	      if(i==_quenchedtot.end())
+		{
+		  dndpe = (--i)->second;
+		}
+	      else if (i==_quenchedtot.begin())
+		{
+		  dndpe =  i->second;
+		  
+		} else {
+	    
+		i_t l=i; --l;
+		
+		const double delta=(mevee2- l->first)/(i->first - l->first);
+		dndpe = delta*i->second +(1-delta)*l->second;
+	      }
+	      dndpeinbin += dndpe*pestep; 
+	      
+	      //	      std::cout <<pe <<" "<<fracpe<<" "<<mevee2<<" "<<dndpe*pestep<<" "<<dndpeinbin<<std::endl;
+	      
+	    } // End of >0 pe case
+	    
+	  } // End of loop over fractional pe integration
+	  //	std::cout <<pe <<" "<<mevee<<" "<<dndpeinbin<<std::endl;
+	  
+	  
+	  dndpeinterp = dndpeinbin/peperMeVee;
+	  
+	  if (isnan(dndpeinterp)) {dndpeinterp=0.;}
+	  
+	  //	if (pe>0) {
 	  totinpe += dndpeinterp;	
 	  //	}
-	_pemapall[pe] = dndpeinterp;
+	  _pemapall[pe] = dndpeinterp;
+
+	} else {
+
+	  // Pad the end with zeroes to allow for smearing
+	  _pemapall[pe] = 0.;
+
+	} // end of pe<=maxmeanpe check
+	
 
       }
 
