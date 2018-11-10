@@ -360,11 +360,9 @@ void DetectorResponse::SetPoissonSmearingMatrix() {
   double pestep = maxSmearEn/NSmearBin; // to synch with Smear method 
      
   for (ipe=0;ipe<NSmearBin;ipe++) {
-    pei += pestep;
     
     pej = 0.;
     for (jpe=0;jpe<NSmearBin;jpe++) {
-      pej += pestep;
 
       // Get the Poisson prob for pei given mean pej
 
@@ -379,11 +377,16 @@ void DetectorResponse::SetPoissonSmearingMatrix() {
       double temp2 = exp(temp1);
       poissprob = temp2*exp(-1.*pej);
 
+      //     std::cout << pej<<" "<<pei<<" "<<poissprob<<std::endl;
+
       SmearingMatrix[ipe][jpe] = poissprob;
+      pej += pestep;
       
     }
 
     if (isnan(SmearingMatrix[ipe][jpe]) ) {SmearingMatrix[ipe][jpe] = 0.;}
+
+    pei += pestep;
 	    
   } // End of loop over rows
 
@@ -420,27 +423,36 @@ std::map<double, double> DetectorResponse::Smear(std::map<double,double> _unsmea
 
 	// Do the smearing
 
-  double enstep = maxSmearEn/NSmearBin;
+  double enstep = (maxSmearEn)/NSmearBin;
 
   int ien, jen;
   double eni=0.;
 
+  // Check unitarity-- don't expect for the Poisson smearing due to
+  //   zero column
+  //for (jen=0;jen<NSmearBin;jen++) {
+  //  double totincol = 0.;
+  // for (ien=0;ien<NSmearBin;ien++) {
+  //    totincol += SmearingMatrix[ien][jen];
+  //  }
+    //    std::cout << "col "<<jen<<" "<<totincol<<std::endl;
+  // }
 
   for (ien=0;ien<NSmearBin;ien++) {
     
-    eni += enstep;
     _smeared[eni] = 0.;
     double enj = 0;
     for (jen=0;jen<NSmearBin;jen++) {
 	  
-      enj += enstep;
       _smeared[eni]  +=   _unsmeared[enj]*SmearingMatrix[ien][jen];
-      //      std::cout << maxSmearEn<<" "<<NSmearBin<<" "<<enstep<<" "<<ien<<" "<<jen<<" "<< eni<<" "<<enj<<" "<<_unsmeared[enj]<<" "<<SmearingMatrix[ien][jen]<<std::endl;
+      //      std::cout << maxSmearEn<<" "<<NSmearBin<<" "<<enstep<<" "<<ien<<" "<<jen<<" "<< eni<<" "<<enj<<" "<<_unsmeared[enj]<<" "<<SmearingMatrix[ien][jen]<<" "<<_smeared[eni]<<std::endl;
+      enj += enstep;
 
     } // End of loop over columns for this row
 	  
     totunsmeared += _unsmeared[eni];
     totsmeared += _smeared[eni];
+    eni += enstep;
 
 
   } // End of loop over rows

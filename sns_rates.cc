@@ -1035,9 +1035,11 @@ int main(int argc, char * argv[] )
 
       int ipe;
       double pe;
+
+      double totinpe = 0.;
+
       for (ipe=0;ipe<=int(maxpe);ipe++) {
 
-	double dndpe;
 	// Interpolate dNdpe from the quenchedmap
 
 	pe = double(ipe);
@@ -1047,44 +1049,69 @@ int main(int argc, char * argv[] )
 
 	double mevee = pe/peperMeVee;
 
+	// Do a more fine-grained interpolation and integrate over pe bin,
+	// to reduce binned integration error
 
-	i_t i=_quenchedtot.upper_bound(mevee);
+	double fracpe;
+	double pestep = 0.1;
 
+	double dndpeinbin=0.;
+	double dndpeinterp;
+	double dndpe;
 
-	if(i==_quenchedtot.end())
-	  {
-	    dndpe = (--i)->second;
-	  }
-	else if (i==_quenchedtot.begin())
-	  {
-	    dndpe =  i->second;
+	// if <pe+0.5 includes last point
+	for (fracpe=pe-0.5;fracpe<pe+0.49;fracpe+=pestep) {
+	  if (fracpe>0) {
 
-	  } else {
+	    double mevee2 = fracpe/peperMeVee;
+
+	    i_t i=_quenchedtot.upper_bound(mevee2);
+
+	    if(i==_quenchedtot.end())
+	      {
+		dndpe = (--i)->second;
+	      }
+	    else if (i==_quenchedtot.begin())
+	      {
+		dndpe =  i->second;
+		
+	      } else {
+	    
+	      i_t l=i; --l;
+	    
+	      const double delta=(mevee2- l->first)/(i->first - l->first);
+	      dndpe = delta*i->second +(1-delta)*l->second;
+	    }
+	    dndpeinbin += dndpe*pestep; 
+
+	    //	    std::cout <<pe <<" "<<fracpe<<" "<<mevee2<<" "<<dndpe*pestep<<" "<<dndpeinbin<<std::endl;
+
+	  } // End of >0 pe case
+
+	} // End of loop over fractional pe integration
+	//	std::cout <<pe <<" "<<mevee<<" "<<dndpeinbin<<std::endl;
+
+	
+	dndpeinterp = dndpeinbin/peperMeVee;
 	  
-	    i_t l=i; --l;
+	if (isnan(dndpeinterp)) {dndpeinterp=0.;}
 
-	    const double delta=(mevee- l->first)/(i->first - l->first);
-	    dndpe= delta*i->second +(1-delta)*l->second;
-
-	  }
-	dndpe /= peperMeVee;
-	  
-	if (isnan(dndpe)) {dndpe=0.;}
-	  
-	_pemapall[pe] = dndpe;
-
-	//	std::cout << "pemapall "<< maxpe<<" "<<ipe<<" "<<pe<<" "<<dndpe<<" "<<peperMeVee<<" "<<mevee<<" "<<_pemapall[pe]<<std::endl;
-
-
+	//	if (pe>0) {
+	  totinpe += dndpeinterp;	
+	  //	}
+	_pemapall[pe] = dndpeinterp;
 
       }
 
+      std::cout << "Integral of pe dist, including zero bin: "<<totinpe<<std::endl;
+
       // Do the Poisson pe smearing if requested
 
+      // Poisson smear includes the zero bin
       DetectorResponse* ps = new DetectorResponse();
 	
-      ps->SetNSmearBin(int(maxpe));
-      ps->SetMaxSmearEn(double(int(maxpe)));
+      ps->SetNSmearBin(int(maxpe)+1);
+      ps->SetMaxSmearEn(double(int(maxpe)+1));
       ps->SetPoissonSmearingMatrix();
 
 	// Do the smearing
@@ -1115,7 +1142,7 @@ int main(int argc, char * argv[] )
 	      pe_eff_factor = detresp->efficnum(pe);	    
 	    }
 
-	    peoutfile << ipe <<" "<<_smearedpemap[pe]*pe_eff_factor<<" "<<_pemapall[pe]<<std::endl;
+	    peoutfile << ipe <<" "<<_smearedpemap[pe]<<" "<<_smearedpemap[pe]*pe_eff_factor<<" "<<_pemapall[pe]<<" "<<_pemapall[pe]*pe_eff_factor<<std::endl;
 	    // It's events per pe bin
 	    totev += _smearedpemap[pe]*pe_eff_factor;
 	    totevunsmeared += _pemapall[pe]*pe_eff_factor;
