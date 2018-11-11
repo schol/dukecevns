@@ -132,9 +132,13 @@ int main(int argc, char * argv[] )
   std::string eff_type = j["detectorresponse"]["efftype"];
   detresp->SetEfficType(eff_type.c_str());
   
-  std::string eff_filename = j["detectorresponse"]["efficiencyfile"];
-  std::cout << "eff_filename: "<<eff_filename<<std::endl;
-  if (eff_filename != "none") {
+  std::string effname = j["detectorresponse"]["efficiencyfile"];
+
+  std::cout << "efficiency filename: "<<effname<<std::endl;
+  if (effname != "none") {
+
+    std::string eff_filename;
+    eff_filename = "eff/"+std::string(effname);
     detresp->SetEfficFilename(eff_filename.c_str());
     detresp->ReadEfficFile();
   } else {
@@ -463,14 +467,14 @@ int main(int argc, char * argv[] )
      // With efficiency, which is a function of Erec in MeV in this formuation
      
      double recoil_eff_factor = 1;
-     if (eff_filename != "none" && eff_type == "erecoil") {
+     if (effname != "none" && eff_type == "erecoil") {
        recoil_eff_factor = detresp->efficnum(Erec);
      }
      
      //     double eff_factor = 1.;
-     std::cout << "recoil eff factor "<<recoil_eff_factor<<std::endl;
+     //     std::cout << "recoil eff factor "<<recoil_eff_factor<<std::endl;
      // Skip if too small contribution
-     if (recoil_eff_factor>0.0001) {
+     if (recoil_eff_factor>0) {
 	  
 
        v = isotope_component.begin();
@@ -711,9 +715,9 @@ int main(int argc, char * argv[] )
 	  }
 
 
-	 std::cout << is<<" "<<"Erec "<<Erec<<" mass frac "<<mass_fraction[is]<<" "<<" ntfac "<<ntfac<<" GV "<<GV_sm_wff<<" GA "<<GA_sm_wff<<std::endl;
+	  //	 std::cout << is<<" "<<"Erec "<<Erec<<" mass frac "<<mass_fraction[is]<<" "<<" ntfac "<<ntfac<<" GV "<<GV_sm_wff<<" GA "<<GA_sm_wff<<std::endl;
 
-	 cout << "is, rate "<<is<<" "<<diffrate_e_vec[is]<<endl;
+	  //	 cout << "is, rate "<<is<<" "<<diffrate_e_vec[is]<<endl;
 
 	 v++;is++;
 
@@ -722,7 +726,7 @@ int main(int argc, char * argv[] )
 
      } // End of efficiency factor check
 
-     std::cout <<Erec<<scientific<<" "<<sum_diffrate_e_vec<<" "<<sum_diffrate_ebar_vec<<" "<<sum_diffrate_mu_vec<<" "<<sum_diffrate_mubar_vec<<" "<<sum_diffrate_tau_vec<<" "<<sum_diffrate_taubar_vec<<" "<<sum_diffrate_e_axial<<" "<<sum_diffrate_ebar_axial<<" "<<sum_diffrate_mu_axial<<" "<<sum_diffrate_mubar_axial<<" "<<sum_diffrate_tau_axial<<" "<<sum_diffrate_taubar_axial<<" "<<sum_diffrate_e_interf<<" "<<sum_diffrate_ebar_interf<<" "<<sum_diffrate_mu_interf<<" "<<sum_diffrate_mubar_interf<<" "<<sum_diffrate_tau_interf<<" "<<sum_diffrate_taubar_interf <<std::endl;
+     //     std::cout <<Erec<<scientific<<" "<<sum_diffrate_e_vec<<" "<<sum_diffrate_ebar_vec<<" "<<sum_diffrate_mu_vec<<" "<<sum_diffrate_mubar_vec<<" "<<sum_diffrate_tau_vec<<" "<<sum_diffrate_taubar_vec<<" "<<sum_diffrate_e_axial<<" "<<sum_diffrate_ebar_axial<<" "<<sum_diffrate_mu_axial<<" "<<sum_diffrate_mubar_axial<<" "<<sum_diffrate_tau_axial<<" "<<sum_diffrate_taubar_axial<<" "<<sum_diffrate_e_interf<<" "<<sum_diffrate_ebar_interf<<" "<<sum_diffrate_mu_interf<<" "<<sum_diffrate_mubar_interf<<" "<<sum_diffrate_tau_interf<<" "<<sum_diffrate_taubar_interf <<std::endl;
 
      // Only want diff values in scientific format
      std::cout.unsetf(ios::fixed | ios::scientific);
@@ -895,7 +899,6 @@ int main(int argc, char * argv[] )
       double dndeee=0.;
 
       double nquenchedtot=0;
-
       
       for (ieee=0;ieee<neeebin;ieee++) {
 	
@@ -955,6 +958,14 @@ int main(int argc, char * argv[] )
       std::cout << "Total quenched: "<<nquenchedtot<<std::endl;
 
 
+      // Now pad the end of the quenched array to allow for smearing
+
+      for (ieee=neeebin;ieee<neeebin*2;ieee++) {
+	eee += eeestep;
+	_quenchedtot[eee] = 0.;
+      }
+
+
     // Now do Gaussian smearing, if requested.  Quenching must be requested also if this is to be invoked.  Apply also efficiency here
 
       // First retrieve the smearing function, which should have Gaussian sigma as a function of Eee
@@ -982,8 +993,8 @@ int main(int argc, char * argv[] )
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
 
-	gs->SetMaxSmearEn(maxeee);
-	gs->SetNSmearBin(neeebin);
+	gs->SetMaxSmearEn(maxeee*2);
+	gs->SetNSmearBin(neeebin*2);
 	gs->SetGaussSmearingMatrix();
 
 	// Do the smearing
@@ -999,13 +1010,13 @@ int main(int argc, char * argv[] )
 
 	double eeei=0.;
 
-	for (ieee=0;ieee<neeebin;ieee++) {
+	for (ieee=0;ieee<neeebin*2;ieee++) {
 
 	  // Apply the Eee efficiency here, if requested
 
 	  double eee_eff_factor = 1.;
 	  if (eeei>=eethresh) {
-	    if (eff_filename != "none" && eff_type == "eee"){
+	    if (effname != "none" && eff_type == "eee"){
 	      eee_eff_factor = detresp->efficnum(eeei);	    
 	    }
 	    eeei += eeestep;
@@ -1149,7 +1160,7 @@ int main(int argc, char * argv[] )
 	  double pe_eff_factor = 1.;
 
 	  if (ipe>=pethresh) {
-	    if (eff_filename != "none" && eff_type == "pe"){
+	    if (effname != "none" && eff_type == "pe"){
 	      pe_eff_factor = detresp->efficnum(pe);	    
 	    }
 
