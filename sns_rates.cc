@@ -127,7 +127,7 @@ int main(int argc, char * argv[] )
 
   double recoilthresh = 0.; //MeVr
   double eethresh = 0.; //MeVr
-  double pethresh = 0.; //pe
+  double qcthresh = 0.; //Collected charge
 
   std::string eff_type = j["detectorresponse"]["efftype"];
   detresp->SetEfficType(eff_type.c_str());
@@ -148,9 +148,9 @@ int main(int argc, char * argv[] )
     } else if (eff_type == "eee") {
       eethresh = j["detectorresponse"]["stepthresh"];
       detresp->SetStepThresh(eethresh); 
-    } else if (eff_type == "pe") {
-      pethresh = j["detectorresponse"]["stepthresh"];
-      detresp->SetStepThresh(pethresh); 
+    } else if (eff_type == "qc") {
+      qcthresh = j["detectorresponse"]["stepthresh"];
+      detresp->SetStepThresh(qcthresh); 
     } 
 
   }
@@ -981,14 +981,14 @@ int main(int argc, char * argv[] )
 
 	DetectorResponse* gs = new DetectorResponse();
 
-	if (gstype == "polyfrac") {
-	  gs->SetGSType(1);
-	} else if (gstype == "polysqrt") {
-	  gs->SetGSType(2);
-	} else {
-	  std::cout << "Need to provide a smearing type" <<std::endl;
-	  exit(0);
-	}
+// 	if (gstype == "polyfrac") {
+// 	  gs->SetGSType(1);
+// 	} else if (gstype == "polysqrt") {
+// 	  gs->SetGSType(2);
+// 	} else {
+// 	  std::cout << "Need to provide a smearing type" <<std::endl;
+// 	  exit(0);
+// 	}
 
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
@@ -1029,153 +1029,155 @@ int main(int argc, char * argv[] )
 
       } // End of do-smearing case
 
-    ////////////  PE-LEVEL RESPONSE ///////////////
+    ////////////  QC-LEVEL RESPONSE ///////////////
     // For this, require quenching also
+      // Collected charge, either pe or ADC, etc.
+
 
       // In principle this can be a nonlinear response function... linear for now
-      double peperkeVee = j["detectorresponse"]["peperkeVee"];
+      double qcperkeVee = j["detectorresponse"]["qcperkeVee"];
 
-      // The total pe distribution (all components... could break it out by isotope)
-      std::map<double, double> _pemapall;
+      // The total qc distribution (all components... could break it out by isotope)
+      std::map<double, double> _qcmapall;
       //Eee in MeVee
 
-      double peperMeVee = peperkeVee*1000.;
-      double maxmeanpe = maxeee*peperMeVee;
-      double maxpe = maxeee*peperMeVee*2; // for smearing matrix
+      double qcperMeVee = qcperkeVee*1000.;
+      double maxmeanqc = maxeee*qcperMeVee;
+      double maxqc = maxeee*qcperMeVee*2; // for smearing matrix
 
-      //      std::cout << "maxpe "<<maxpe<<" maxmeanpe "<<maxmeanpe<<std::endl;
-      // Loop over pe's, as integers
+      //      std::cout << "maxqc "<<maxqc<<" maxmeanqc "<<maxmeanqc<<std::endl;
+      // Loop over qc's, as integers
 
-      int ipe;
-      double pe;
+      int iqc;
+      double qc;
 
-      double totinpe = 0.;
+      double totinqc = 0.;
 
-      for (ipe=0;ipe<=int(maxpe);ipe++) {
+      for (iqc=0;iqc<=int(maxqc);iqc++) {
 
-	// Interpolate dNdpe from the quenchedmap
+	// Interpolate dNdqc from the quenchedmap
 
-	if (pe<=maxmeanpe+0.01) {
-	  pe = double(ipe);
+	if (qc<=maxmeanqc+0.01) {
+	  qc = double(iqc);
 
 
 	  typedef std::map<double, double>::const_iterator i_t;
 	  
-	  double mevee = pe/peperMeVee;
+	  double mevee = qc/qcperMeVee;
 	  
-	  // Do a more fine-grained interpolation and integrate over pe bin,
+	  // Do a more fine-grained interpolation and integrate over qc bin,
 	  // to reduce binned integration error
 
-	  double fracpe;
-	  double pestep = 0.1;
+	  double fracqc;
+	  double qcstep = 0.1;
 	  
-	  double dndpeinbin=0.;
-	  double dndpeinterp;
-	  double dndpe;
+	  double dndqcinbin=0.;
+	  double dndqcinterp;
+	  double dndqc;
 	  
-	  // if <pe+0.5 includes last point
-	  for (fracpe=pe-0.5;fracpe<pe+0.49;fracpe+=pestep) {
-	    if (fracpe>0) {
+	  // if <qc+0.5 includes last point
+	  for (fracqc=qc-0.5;fracqc<qc+0.49;fracqc+=qcstep) {
+	    if (fracqc>0) {
 	      
-	      double mevee2 = fracpe/peperMeVee;
+	      double mevee2 = fracqc/qcperMeVee;
 	      
 	      i_t i=_quenchedtot.upper_bound(mevee2);
 	      
 	      if(i==_quenchedtot.end())
 		{
-		  dndpe = (--i)->second;
+		  dndqc = (--i)->second;
 		}
 	      else if (i==_quenchedtot.begin())
 		{
-		  dndpe =  i->second;
+		  dndqc =  i->second;
 		  
 		} else {
 	    
 		i_t l=i; --l;
 		
 		const double delta=(mevee2- l->first)/(i->first - l->first);
-		dndpe = delta*i->second +(1-delta)*l->second;
+		dndqc = delta*i->second +(1-delta)*l->second;
 	      }
-	      dndpeinbin += dndpe*pestep; 
+	      dndqcinbin += dndqc*qcstep; 
 	      
-	      //	      std::cout <<pe <<" "<<fracpe<<" "<<mevee2<<" "<<dndpe*pestep<<" "<<dndpeinbin<<std::endl;
+	      //	      std::cout <<qc <<" "<<fracqc<<" "<<mevee2<<" "<<dndqc*qcstep<<" "<<dndqcinbin<<std::endl;
 	      
-	    } // End of >0 pe case
+	    } // End of >0 qc case
 	    
-	  } // End of loop over fractional pe integration
-	  //	std::cout <<pe <<" "<<mevee<<" "<<dndpeinbin<<std::endl;
+	  } // End of loop over fractional qc integration
+	  //	std::cout <<qc <<" "<<mevee<<" "<<dndqcinbin<<std::endl;
 	  
 	  
-	  dndpeinterp = dndpeinbin/peperMeVee;
+	  dndqcinterp = dndqcinbin/qcperMeVee;
 	  
-	  if (isnan(dndpeinterp)) {dndpeinterp=0.;}
+	  if (isnan(dndqcinterp)) {dndqcinterp=0.;}
 	  
-	  //	if (pe>0) {
-	  totinpe += dndpeinterp;	
+	  //	if (qc>0) {
+	  totinqc += dndqcinterp;	
 	  //	}
-	  _pemapall[pe] = dndpeinterp;
+	  _qcmapall[qc] = dndqcinterp;
 
 	} else {
 
 	  // Pad the end with zeroes to allow for smearing
-	  _pemapall[pe] = 0.;
+	  _qcmapall[qc] = 0.;
 
-	} // end of pe<=maxmeanpe check
+	} // end of qc<=maxmeanqc check
 	
 
       }
 
-      std::cout << "Integral of pe dist, including zero bin: "<<totinpe<<std::endl;
+      std::cout << "Integral of qc dist, including zero bin: "<<totinqc<<std::endl;
 
-      // Do the Poisson pe smearing if requested
+      // Do the Poisson qc smearing if requested
 
       // Poisson smear includes the zero bin
       DetectorResponse* ps = new DetectorResponse();
 	
-      ps->SetNSmearBin(int(maxpe)+1);
-      ps->SetMaxSmearEn(double(int(maxpe)+1));
+      ps->SetNSmearBin(int(maxqc)+1);
+      ps->SetMaxSmearEn(double(int(maxqc)+1));
       ps->SetPoissonSmearingMatrix();
 
 	// Do the smearing
-      std::map<double,double> _smearedpemap = ps->Smear(_pemapall);
+      std::map<double,double> _smearedqcmap = ps->Smear(_qcmapall);
      
       
-      // Output the pe distribution, applying efficiency if requested
+      // Output the qc distribution, applying efficiency if requested
       // (should not also have recoil or quenched efficiency)
 
-	std::ofstream peoutfile;
-	outfilename = "out/sns_diff_rates_pe-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+      std::ofstream qcoutfile;
+      outfilename = "out/sns_diff_rates_qc-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
 	
-	std::cout << outfilename << std::endl;
-	peoutfile.open(outfilename);
+      std::cout << outfilename << std::endl;
+      qcoutfile.open(outfilename);
+      
+      double totev = 0.;
+      double totevunsmeared = 0.;
+
+      for (iqc=0;iqc<=int(maxqc);iqc++) {
+	  
+	// Apply the qc efficiency here, if requested
 	
-	double totev = 0.;
-	double totevunsmeared = 0.;
-
-	for (ipe=0;ipe<=int(maxpe);ipe++) {
-
-	  // Apply the pe efficiency here, if requested
-
-	  pe = double(ipe);
-	  double pe_eff_factor = 1.;
-
-	  if (ipe>=pethresh) {
-	    if (effname != "none" && eff_type == "pe"){
-	      pe_eff_factor = detresp->efficnum(pe);	    
-	    }
-
-	    peoutfile << ipe <<" "<<_smearedpemap[pe]<<" "<<_smearedpemap[pe]*pe_eff_factor<<" "<<_pemapall[pe]<<" "<<_pemapall[pe]*pe_eff_factor<<std::endl;
-	    // It's events per pe bin
-	    totev += _smearedpemap[pe]*pe_eff_factor;
-	    totevunsmeared += _pemapall[pe]*pe_eff_factor;
+	qc = double(iqc);
+	double qc_eff_factor = 1.;
+	
+	if (iqc>=qcthresh) {
+	  if (effname != "none" && eff_type == "qc"){
+	    qc_eff_factor = detresp->efficnum(qc);	    
 	  }
+	  
+	  qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
+	  // It's events per qc bin
+	  totev += _smearedqcmap[qc]*qc_eff_factor;
+	  totevunsmeared += _qcmapall[qc]*qc_eff_factor;
 	}
+      }
+      
 
+      qcoutfile.close();
 
-	peoutfile.close();
-
-
-	cout << "Total events: "<<totev<<" unsmeared "<<totevunsmeared<<endl;
+      
+      cout << "Total events: "<<totev<<" unsmeared "<<totevunsmeared<<endl;
     }  // End of do-quenching case
 
 
