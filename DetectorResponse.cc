@@ -125,9 +125,14 @@ double DetectorResponse::qfpoly(double erec) {
 
   // erec in MeV
   double qf=0;
-  if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
-    for (int i=0; i<qfpolycoeff.size();i++) {
+  for (int i=0; i<qfpolycoeff.size();i++) {
+    if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
       qf += qfpolycoeff[i]*pow(erec,i);
+    } else if (erec<qfpolyrange[0]) {
+      qf += qfpolycoeff[i]*pow(qfpolyrange[0],i);
+    } else {
+      qf += qfpolycoeff[i]*pow(qfpolyrange[1],i);
+
     }
   }
 
@@ -141,10 +146,18 @@ double DetectorResponse::qfpolyderiv(double erec) {
 
   // erec in MeV
   double qfderiv = 0;
-  if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
-    for (int i=0; i<qfpolycoeff.size();i++) {
+  for (int i=0; i<qfpolycoeff.size();i++) {
+      
+    if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
+
       qfderiv += (i+1)*qfpolycoeff[i]*pow(erec,i);
+    } else if (erec<qfpolyrange[0]) {
+      qfderiv += (i+1)*qfpolycoeff[i]*pow(qfpolyrange[0],i);
+    } else {
+      qfderiv += (i+1)*qfpolycoeff[i]*pow(qfpolyrange[1],i);
+
     }
+
   }
 
   return qfderiv;
@@ -215,12 +228,20 @@ double DetectorResponse::gspoly(double en) {
 
   // erec in MeV
   double gs=0;
-  if (en>=gspolyrange[0]  && en<=gspolyrange[1] ) {
-    for (int i=0; i<gspolycoeff.size();i++) {
-      gs += gspolycoeff[i]*pow(en,i);
-    }
-  }
+  for (int i=0; i<gspolycoeff.size();i++) {
 
+    if (en>=gspolyrange[0]  && en<=gspolyrange[1] ) {
+      gs += gspolycoeff[i]*pow(en,i);
+    } else if (en<gspolyrange[0]) {
+      // Use enpoint values if out of range
+      gs += gspolycoeff[i]*pow(gspolyrange[0],i);
+    } else {
+      gs += gspolycoeff[i]*pow(gspolyrange[1],i);
+    }
+
+
+  }
+    
   return gs;
 } 
 
