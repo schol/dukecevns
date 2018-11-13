@@ -187,11 +187,11 @@ double* DetectorResponse::GetQFPolyRange() { return qfpolyrange;}
 // Polynomial GS-related methods
 
 
-void DetectorResponse::SetGSType(int type) {
-  gstype = type;
+void DetectorResponse::SetGSType(const char * type) {
+  strcpy(gstype, type);
 }
 
-int DetectorResponse::GetGSType() {
+const char * DetectorResponse::GetGSType() {
   return gstype;
 }
 
@@ -206,6 +206,11 @@ void DetectorResponse::ReadGSPolyFile() {
     std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
   } else {
+    char smeartype[80];
+    gspolyfile >> smeartype;
+
+    strcpy(gstype, smeartype);
+    std::cout << "gstype "<<gstype << std::endl;
     gspolyfile >> gspolyrange[0]>>gspolyrange[1];
 
     while(! gspolyfile.eof() ) 
@@ -323,15 +328,19 @@ void DetectorResponse::SetGaussSmearingMatrix() {
     for (jen=0;jen<NSmearBin;jen++) {
       enj += enstep;
       double sigma;
-      if (gstype == 1) {
+      //      std::cout << "gstype: "<<gstype<<std::endl;
+      if (strcmp(gstype,"polyfrac")==0) {
 	sigma = this->gspoly(enj)*enj;
-      } else if (gstype == 2) {
+      } else if (strcmp(gstype,"poly")) {
+	sigma = this->gspoly(enj);
+      } else if (strcmp(gstype,"polysqrt")) {
 	sigma = sqrt(this->gspoly(enj));
       } else {
 	std::cout << "Unknown smearing type; please set gstype "<<std::endl;
 	exit(1);
       }
 
+      //      std::cout << "sigma "<<eni<<" "<<enj<<" "<<sigma <<std::endl;
 
       SmearingMatrix[ien][jen] = exp(-pow(eni-enj,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
 

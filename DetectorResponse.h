@@ -69,9 +69,9 @@ class DetectorResponse
 
   // For Gaussian smearing in polynomial formats
 
-  int gstype;
-  void SetGSType(int);
-  int GetGSType();
+  char gstype[0];
+  void SetGSType(const char *);
+  const char * GetGSType();
 
   void SetGSPolyRange(double*);
   double* GetGSPolyRange();
