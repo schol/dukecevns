@@ -973,7 +973,6 @@ int main(int argc, char * argv[] )
 
       if (gsname != "none") {
 	
-	std::string gstype = j["detectorresponse"]["gstype"];
 
 	// Read the smearing parameters from the file and set them
 	std::string gsfilename;
@@ -981,14 +980,6 @@ int main(int argc, char * argv[] )
 
 	DetectorResponse* gs = new DetectorResponse();
 
-// 	if (gstype == "polyfrac") {
-// 	  gs->SetGSType(1);
-// 	} else if (gstype == "polysqrt") {
-// 	  gs->SetGSType(2);
-// 	} else {
-// 	  std::cout << "Need to provide a smearing type" <<std::endl;
-// 	  exit(0);
-// 	}
 
 	gs->SetGSPolyFilename(gsfilename.c_str());
 	gs->ReadGSPolyFile();
@@ -1131,15 +1122,30 @@ int main(int argc, char * argv[] )
 
       // Do the Poisson qc smearing if requested
 
+      std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
+
+
       // Poisson smear includes the zero bin
-      DetectorResponse* ps = new DetectorResponse();
+      DetectorResponse* qcsmear = new DetectorResponse();
+
+      qcsmear->SetNSmearBin(int(maxqc)+1);
+      qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
+
+      if (qcsmearing == "poisson") {
+
 	
-      ps->SetNSmearBin(int(maxqc)+1);
-      ps->SetMaxSmearEn(double(int(maxqc)+1));
-      ps->SetPoissonSmearingMatrix();
+	qcsmear->SetPoissonSmearingMatrix();
+
+      } else {
+	std::string qcsmearfilename;
+	qcsmearfilename = "gs/"+std::string(gsname)+"_qcsmear.txt";
+	qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
+	qcsmear->ReadGSPolyFile();
+	qcsmear->SetGaussSmearingMatrix();
+      }
 
 	// Do the smearing
-      std::map<double,double> _smearedqcmap = ps->Smear(_qcmapall);
+      std::map<double,double> _smearedqcmap = qcsmear->Smear(_qcmapall);
      
       
       // Output the qc distribution, applying efficiency if requested
