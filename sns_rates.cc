@@ -196,6 +196,8 @@ int main(int argc, char * argv[] )
   std::cout << "Material "<<matname<<std::endl;
 
   // Quenching filename info
+
+  std::string qftype = j["detectorresponse"]["qftype"];
   std::string qfname = j["detectorresponse"]["qfname"];
 
   int is=0;
@@ -358,19 +360,27 @@ int main(int argc, char * argv[] )
     ffpa[is]->SetZ(Z);
  
   // Set up detector quenching factors for each component
+
     
-    if (qfname != "none") {
+    if (qftype == "poly") {
       std::string qffilename;
       qffilename = "qf/"+std::string(qfname)+"_"+isoname+"_qf.txt";
+      DetectorResponse* qf = new DetectorResponse();
 	
       std::cout << "Quenching factor: "<<qffilename<<std::endl;
-      DetectorResponse* qf = new DetectorResponse();
       qffunc[is] = qf;
       qffunc[is]->SetQFPolyFilename(qffilename.c_str());
       qffunc[is]->ReadQFPolyFile();
+    } else if (qftype == "numerical") {
+      std::string qffilename;
+      qffilename = "qf/"+std::string(qfname)+"_"+isoname+"_qfnum.txt";
+      DetectorResponse* qf = new DetectorResponse();
+	
+      std::cout << "Quenching factor: "<<qffilename<<std::endl;
+      qffunc[is] = qf;
+      qffunc[is]->SetQFFilename(qffilename.c_str());
+      qffunc[is]->ReadQFFile();
     }
-
-
     v++; is++;
   }
 
@@ -381,8 +391,6 @@ int main(int argc, char * argv[] )
   double exposure = 3600.*hoursperyear;
   
   double norm_factor = detector_mass*exposure;
-
-
 
   // Use the mass of the lightest component
   double erecmaxall = 2*kmax*kmax/(minM+2*kmax);
@@ -582,9 +590,12 @@ int main(int argc, char * argv[] )
 	  // Quenching factor for this component and Eee for this Erec
 
 	 double qfderiv=1;
-	 if (qfname != "none") {
+	 if (qftype == "poly") {
 	  Eee[is][iq] = qffunc[is]->qfpoly(Erec)*Erec;
 	  qfderiv = abs(qffunc[is]->qfpolyderiv(Erec));
+	 } else if (qftype == "numerical") {
+	  Eee[is][iq] = qffunc[is]->qfnum(Erec)*Erec;
+	  qfderiv = abs(qffunc[is]->qfnumderiv(Erec));
 	 }
 
 
@@ -892,7 +903,8 @@ int main(int argc, char * argv[] )
       // Fixed number of steps in quenched energy
       int  ieee = 0;
 
-      int neeebin = j["detectorresponse"]["neeebin"];
+      //      int neeebin = j["detectorresponse"]["neeebin"];
+      int neeebin = iq;
 
       double eeestep = maxeee/neeebin;
       double eee = 0;
@@ -944,7 +956,8 @@ int main(int argc, char * argv[] )
 	
 
       // Now output the total quenched output, per MeVee
-	qoutfile << eee<<" "<<_quenchedtot[eee]<<std::endl;
+	qoutfile <<eee<<" "<<_quenchedtot[eee]<<std::endl;
+	std::cout.unsetf(ios::fixed | ios::scientific);
 
 	nquenchedtot += _quenchedtot[eee]*eeestep;
 
@@ -989,7 +1002,7 @@ int main(int argc, char * argv[] )
 	gs->SetGaussSmearingMatrix();
 
 	// Do the smearing
-	std::map<double,double> _smearedmap = gs->Smear(_quenchedtot);
+	std::map<double,double> _smearedmap= gs->Smear(_quenchedtot);
 
       // Output the smeared output file
 
@@ -1043,8 +1056,10 @@ int main(int argc, char * argv[] )
       double qc;
 
       double totinqc = 0.;
+      int qcbinning = j["detectorresponse"]["qcbinning"];
+      
 
-      for (iqc=0;iqc<=int(maxqc);iqc++) {
+      for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
 
 	// Interpolate dNdqc from the quenchedmap
 
@@ -1054,10 +1069,11 @@ int main(int argc, char * argv[] )
 
 	  typedef std::map<double, double>::const_iterator i_t;
 	  
-	  double mevee = qc/qcperMeVee;
+	  //	  double mevee = qc/qcperMeVee;
 	  
 	  // Do a more fine-grained interpolation and integrate over qc bin,
 	  // to reduce binned integration error
+	  // Not always really necessary
 
 	  double fracqc;
 	  double qcstep = 0.1;
@@ -1124,16 +1140,14 @@ int main(int argc, char * argv[] )
 
       std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
 
-
       // Poisson smear includes the zero bin
       DetectorResponse* qcsmear = new DetectorResponse();
 
-      qcsmear->SetNSmearBin(int(maxqc)+1);
+      qcsmear->SetQCBinning(qcbinning);
+      qcsmear->SetNSmearBin(int(maxqc/qcbinning)+1);
       qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
 
       if (qcsmearing == "poisson") {
-
-	
 	qcsmear->SetPoissonSmearingMatrix();
 
       } else {
@@ -1144,6 +1158,8 @@ int main(int argc, char * argv[] )
 	qcsmear->SetGaussSmearingMatrix();
       }
 
+
+      std::cout << "do qc smearing" <<std::endl;
 	// Do the smearing
       std::map<double,double> _smearedqcmap = qcsmear->Smear(_qcmapall);
      
@@ -1160,7 +1176,7 @@ int main(int argc, char * argv[] )
       double totev = 0.;
       double totevunsmeared = 0.;
 
-      for (iqc=0;iqc<=int(maxqc);iqc++) {
+      for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
 	  
 	// Apply the qc efficiency here, if requested
 	
@@ -1174,8 +1190,8 @@ int main(int argc, char * argv[] )
 	  
 	  qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
 	  // It's events per qc bin
-	  totev += _smearedqcmap[qc]*qc_eff_factor;
-	  totevunsmeared += _qcmapall[qc]*qc_eff_factor;
+	  totev += _smearedqcmap[qc]*qc_eff_factor*qcbinning;
+	  totevunsmeared += _qcmapall[qc]*qc_eff_factor*qcbinning;
 	}
       }
       

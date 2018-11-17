@@ -70,6 +70,36 @@ double DetectorResponse::qfnum(double erec)
 
 }
 
+double DetectorResponse::qfnumderiv(double erec)
+{
+
+  double qfnumderiv = 0.;
+
+  // Compute the derivative of the numerical map at value erec
+
+  typedef std::map<double, double>::const_iterator i_t;
+
+  i_t i=_qfmap.upper_bound(erec);
+
+  if(i==_qfmap.end())
+    {
+      return (--i)->second;
+    }
+  if (i==_qfmap.begin())
+    {
+      return i->second;
+    }
+  i_t l=i; --l;
+  
+  const double delta=(i->second- l->second)/(i->first - l->first);
+  qfnumderiv= delta;
+
+  if (isnan(qfnumderiv)) {qfnumderiv=0.;}
+
+  return qfnumderiv;
+
+}
+
 void DetectorResponse::SetQFFilename(const char * fname) {
   strcpy(qffilename, fname);
 }
@@ -251,6 +281,29 @@ double DetectorResponse::gspoly(double en) {
 } 
 
 
+double DetectorResponse::gspolysqrt(double en) {
+
+  // returns the sigma as a function of energy (usually Eee)
+
+  // erec in MeV
+  double gs=0;
+  double entoeval = en;
+
+  if (en<gspolyrange[0]) {
+    // Use endpoint values if out of range
+    entoeval = gspolyrange[0];
+    
+  } else if (en>gspolyrange[1]) {
+    entoeval = gspolyrange[0];
+  }
+    
+
+  gs=  gspolycoeff[0]*sqrt(entoeval)+gspolycoeff[1]*entoeval;
+   
+  return gs;
+} 
+
+
 
 void DetectorResponse::SetGSPolyFilename(const char * fname) {
   strcpy(gspolyfilename, fname);
@@ -286,6 +339,15 @@ int DetectorResponse::GetNEeeBin() {
   return NEeeBin;
 }
 
+void DetectorResponse::SetQCBinning(int qcbin) {
+  qcbinning = qcbin;
+}
+
+int DetectorResponse::GetQCBinning() {
+  return qcbinning;
+}
+
+
 
 void DetectorResponse::SetMaxSmearEn(double maxsmearen) {
   maxSmearEn = maxsmearen;
@@ -319,23 +381,32 @@ void DetectorResponse::SetGaussSmearingMatrix() {
   double enj=0.;
   int ien, jen;
 
-  double enstep = maxSmearEn/NSmearBin;
+  double enstep;
+  if (qcbinning>0) {
+    enstep = qcbinning;
+  } else {
+    enstep  = maxSmearEn/NSmearBin;
+  }
+  std::cout << "Setting smearing of gstype: "<<gstype<<" "<<NSmearBin<<" "<<maxSmearEn<<std::endl;
      
   for (ien=0;ien<NSmearBin;ien++) {
     eni += enstep;
-    
+
     enj = 0.;
     for (jen=0;jen<NSmearBin;jen++) {
       enj += enstep;
       double sigma;
-      //      std::cout << "gstype: "<<gstype<<std::endl;
-      if (strcmp(gstype,"polyfrac")==0) {
+      if (strncmp(gstype,"polyfrac",8)==0) {
 	sigma = this->gspoly(enj)*enj;
-      } else if (strcmp(gstype,"poly")) {
-	sigma = this->gspoly(enj);
-      } else if (strcmp(gstype,"polysqrt")) {
+      } else if (strncmp(gstype,"polysqrt",8)==0) {
+	sigma = this->gspolysqrt(enj);
+	//	std::cout << gstype<<" "<<ien<<" "<<jen<<" "<<eni<<" "<<enj<<" "<<sigma <<std::endl;
+      } else if (strncmp(gstype,"sqrtofpoly",10)==0) {
 	sigma = sqrt(this->gspoly(enj));
-      } else {
+      } else if (strncmp(gstype,"poly",4)==0) {
+	sigma = this->gspoly(enj);
+      }
+      else {
 	std::cout << "Unknown smearing type; please set gstype "<<std::endl;
 	exit(1);
       }
@@ -371,6 +442,7 @@ void DetectorResponse::SetGaussSmearingMatrix() {
   } // End of normalizing
 
 }
+
 
 
 void DetectorResponse::SetPoissonSmearingMatrix() {
@@ -453,7 +525,13 @@ std::map<double, double> DetectorResponse::Smear(std::map<double,double> _unsmea
 
 	// Do the smearing
 
-  double enstep = (maxSmearEn)/NSmearBin;
+  
+  double enstep;
+  if (qcbinning>0) {
+    enstep = qcbinning;
+  } else {
+    enstep  = maxSmearEn/NSmearBin;
+  }
 
   int ien, jen;
   double eni=0.;
@@ -468,14 +546,20 @@ std::map<double, double> DetectorResponse::Smear(std::map<double,double> _unsmea
     //    std::cout << "col "<<jen<<" "<<totincol<<std::endl;
   // }
 
+  
+
   for (ien=0;ien<NSmearBin;ien++) {
     
     _smeared[eni] = 0.;
     double enj = 0;
+
     for (jen=0;jen<NSmearBin;jen++) {
 	  
       _smeared[eni]  +=   _unsmeared[enj]*SmearingMatrix[ien][jen];
-      //      std::cout << maxSmearEn<<" "<<NSmearBin<<" "<<enstep<<" "<<ien<<" "<<jen<<" "<< eni<<" "<<enj<<" "<<_unsmeared[enj]<<" "<<SmearingMatrix[ien][jen]<<" "<<_smeared[eni]<<std::endl;
+
+      //      if (SmearingMatrix[ien][jen]>0) { 
+      //std::cout << maxSmearEn<<" "<<NSmearBin<<" "<<enstep<<" "<<ien<<" "<<jen<<" "<< eni<<" "<<enj<<" "<<_unsmeared[enj]<<" "<<SmearingMatrix[ien][jen]<<" "<<_smeared[eni]<<std::endl;
+      //}
       enj += enstep;
 
     } // End of loop over columns for this row

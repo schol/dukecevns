@@ -29,6 +29,16 @@ class DetectorResponse
   char gspolyfilename[80];
   std::vector<double> gspolycoeff;
   double gspolyrange[2]; // Range of validity for polynomial
+  char gstype[0];
+
+  int NEeeBin;
+  double maxEee;
+  double maxSmearEn;
+  int NSmearBin;
+  double** SmearingMatrix;
+
+  int qcbinning=0; // Bin size for qc variable
+
 
   // Efficiency type:  recoil or electron-equivalent
   char efftype[80];
@@ -40,6 +50,7 @@ class DetectorResponse
   // For efficiency in numerical format
   std::map<double,double> _efficmap;
   char efficfilename[80];
+
 
  public: 
   DetectorResponse();
@@ -54,6 +65,7 @@ class DetectorResponse
   const char * GetQFFilename();
   void ReadQFFile();
   double qfnum(double);
+  double qfnumderiv(double);
   double maxErec();
 
   // For QF in polynomial format
@@ -69,7 +81,6 @@ class DetectorResponse
 
   // For Gaussian smearing in polynomial formats
 
-  char gstype[0];
   void SetGSType(const char *);
   const char * GetGSType();
 
@@ -80,31 +91,31 @@ class DetectorResponse
   const char * GetGSPolyFilename();
   void ReadGSPolyFile();
   double gspoly(double);
-  std::map<double,double> Smear(std::map<double,double>);
+  double gspolysqrt(double);
 
-  int NEeeBin;
   void SetNEeeBin(int);
   int GetNEeeBin();
 
+  void SetQCBinning(int);
+  int GetQCBinning();
 
-  double maxEee;
+
   void SetMaxEee(double);
   double GetMaxEee();
 
 
-  double maxSmearEn;
   void SetMaxSmearEn(double);
   double GetMaxSmearEn();
 
-  int NSmearBin;
   void SetNSmearBin(int);
   int GetNSmearBin();
 
-
-  double** SmearingMatrix;
   // Not bothering to clean this up with a delete method, I'm a bad person
+
   void SetGaussSmearingMatrix();
   void SetPoissonSmearingMatrix();
+
+  std::map<double,double> Smear(std::map<double,double>);
 
   // For efficiency as a function of Erec, file in numerical format
 
