@@ -4,6 +4,7 @@
 // All energies in MeV
 
 double A2forcm2=8.43103e-45; // ((G^2)/(2  Pi)) *hbarcinmeters^-4*(100)^2
+double hbarcincm=197.327e-13;
 
 /////////////////////////
 // Differential cross section in cm^2 MeV^-1  for combination with GV, GA
@@ -29,6 +30,17 @@ double diffxscninterf(double knu, double mass, double erec) {
   
         //      std::cout << erec<<" "<<q<<" "<<F<<" "<<std::endl;
   return A2forcm2*mass*(4*erec/knu-2*erec*erec/(knu*knu));
+
+}
+
+
+double diffxscnmag(double knu, double erec) {
+
+  double me=0.51099895;
+  double alpha = 0.0072973525664;
+  
+
+  return M_PI*pow(alpha,2)*pow(hbarcincm,2)/pow(me,2)*(1/erec-1/knu + erec/(4*knu*knu));
 
 }
 

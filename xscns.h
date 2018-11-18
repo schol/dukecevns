@@ -4,6 +4,7 @@
 double diffxscnvec(double, double, double);
 double diffxscnaxial(double, double, double);
 double diffxscninterf(double, double, double);
+double diffxscnmag(double, double);
 
 void sm_vector_couplings(int, double*);
 void sm_axial_couplings(int, int, double*);

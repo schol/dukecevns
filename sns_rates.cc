@@ -447,6 +447,14 @@ int main(int argc, char * argv[] )
      double diffrate_tau_interf[max_components]={0.};
      double diffrate_taubar_interf[max_components]={0.};
 
+     double diffrate_e_mag[max_components]={0.};
+     double diffrate_ebar_mag[max_components]={0.};
+     double diffrate_mu_mag[max_components]={0.};
+     double diffrate_mubar_mag[max_components]={0.};
+     double diffrate_tau_mag[max_components]={0.};
+     double diffrate_taubar_mag[max_components]={0.};
+
+
 
      // Sum for each component,  not quenched
 
@@ -470,6 +478,14 @@ int main(int argc, char * argv[] )
      double sum_diffrate_mubar_interf=0;
      double sum_diffrate_tau_interf=0;
      double sum_diffrate_taubar_interf=0;
+
+     double sum_diffrate_e_mag=0;
+     double sum_diffrate_ebar_mag=0;
+     double sum_diffrate_mu_mag=0;
+     double sum_diffrate_mubar_mag=0;
+     double sum_diffrate_tau_mag=0;
+     double sum_diffrate_taubar_mag=0;
+
      
      
      // With efficiency, which is a function of Erec in MeV in this formuation
@@ -578,6 +594,31 @@ int main(int argc, char * argv[] )
 	}
 
 
+	// Magnetic moment..by flavor not quite right but OK for now
+
+	double munu_e=0.;
+	double munu_ebar=0.;
+	double munu_mu=0.;
+	double munu_mubar=0.;
+	double munu_tau=0.;
+	double munu_taubar=0.;
+
+	if (j.find("magmom") != j.end()) {
+
+	  munu_e = j["magmom"]["nue"];
+	  munu_ebar = j["magmom"]["nuebar"];
+	  munu_mu = j["magmom"]["numu"];
+	  munu_mubar = j["magmom"]["numubar"];
+	  munu_tau = j["magmom"]["nutau"];
+	  munu_taubar = j["magmom"]["nutaubar"];
+	  munu_e *= 1.e-10;
+	  munu_ebar *= 1.e-10;
+	  munu_mu *= 1.e-10;
+	  munu_mubar *= 1.e-10;
+	  munu_tau *= 1.e-10;
+	  munu_taubar *= 1.e-10;
+	  
+	}
 
 	 // Normalize for one ton of material
 	 // Will be weighted by mass fraction
@@ -622,6 +663,15 @@ int main(int argc, char * argv[] )
 	 double drate_tau_interf=0;
 	 double drate_taubar_interf=0;
 
+
+	 double drate_e_mag=0;
+	 double drate_ebar_mag=0;
+	 double drate_mu_mag=0;
+	 double drate_mubar_mag=0;
+	 double drate_tau_mag=0;
+	 double drate_taubar_mag=0;
+
+
 	 // Dumb integral, could be more clever to make it faster
 	 for (knu=knumin;knu<=kmax;knu+=knustep) {
 	  	  
@@ -647,6 +697,14 @@ int main(int argc, char * argv[] )
 	   drate_mubar_interf += diffxscninterf(knu,M,Erec)*snsflux->fluxval(knu,-2,knustep);
 	   drate_tau_interf +=  diffxscninterf(knu,M,Erec)*snsflux->fluxval(knu,3,knustep);
 	   drate_taubar_interf += diffxscninterf(knu,M,Erec)*snsflux->fluxval(knu,-3,knustep);
+
+	   drate_e_mag += diffxscnmag(knu,Erec)*snsflux->fluxval(knu,1,knustep);
+	   drate_ebar_mag += diffxscnmag(knu,Erec)*snsflux->fluxval(knu,-1,knustep);
+	   drate_mu_mag += diffxscnmag(knu,Erec)*snsflux->fluxval(knu,2,knustep);
+	   drate_mubar_mag += diffxscnmag(knu,Erec)*snsflux->fluxval(knu,-2,knustep);
+	   drate_tau_mag +=  diffxscnmag(knu,Erec)*snsflux->fluxval(knu,3,knustep);
+	   drate_taubar_mag += diffxscnmag(knu,Erec)*snsflux->fluxval(knu,-3,knustep);
+
 
 	      
 	   //    std::cout << Erec << " "<<knu<<" "<<snsflux->fluxval(knu,1,knustep)<<" "<<diffrate_e_vec<<std::endl;
@@ -679,6 +737,14 @@ int main(int argc, char * argv[] )
 	 diffrate_tau_interf[is] +=  ntfac*GV_sm_wff_tau*GA_sm_wff*mass_fraction[is]*drate_tau_interf;
 	 diffrate_taubar_interf[is] +=  ntfac*GV_sm_wff_taubar*GA_sm_bar_wff*mass_fraction[is]*drate_taubar_interf;
 
+	 diffrate_e_mag[is] += ntfac*pow(munu_e,2)*pow(Z,2)*mass_fraction[is]*drate_e_mag*wnue;
+	 diffrate_ebar_mag[is] += ntfac*pow(munu_ebar,2)*pow(Z,2)*mass_fraction[is]*drate_ebar_mag;
+	 diffrate_mu_mag[is] += ntfac*pow(munu_mu,2)*pow(Z,2)*mass_fraction[is]*drate_mu_mag*wnumu;
+	 diffrate_mubar_mag[is] += ntfac*pow(munu_mubar,2)*pow(Z,2)*mass_fraction[is]*drate_mubar_mag*wnumubar;
+	 diffrate_tau_mag[is] +=  ntfac*pow(munu_tau,2)*pow(Z,2)*mass_fraction[is]*drate_tau_mag;
+	 diffrate_taubar_mag[is] +=  ntfac*pow(munu_taubar,2)*pow(Z,2)*mass_fraction[is]*drate_taubar_mag;
+
+
 	  // Now add the contribution from this isotope to the sum
 	  
 
@@ -704,12 +770,26 @@ int main(int argc, char * argv[] )
 	 sum_diffrate_taubar_interf += diffrate_taubar_interf[is]*norm_factor*recoil_eff_factor;
 
 
+	 sum_diffrate_e_mag += diffrate_e_mag[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_ebar_mag += diffrate_ebar_mag[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mu_mag += diffrate_mu_mag[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_mubar_mag += diffrate_mubar_mag[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_tau_mag += diffrate_tau_mag[is]*norm_factor*recoil_eff_factor;
+	 sum_diffrate_taubar_mag += diffrate_taubar_mag[is]*norm_factor*recoil_eff_factor;
+
+
+
 	  // Sum for this Erec and isotope
 	  double sum_events_iso = 0;
 	  sum_events_iso = diffrate_e_vec[is] + diffrate_ebar_vec[is] + diffrate_mu_vec[is]+ diffrate_mubar_vec[is]+ diffrate_tau_vec[is] + diffrate_taubar_vec[is];
 	  sum_events_iso += diffrate_e_axial[is] + diffrate_ebar_axial[is] + diffrate_mu_axial[is]+ diffrate_mubar_axial[is]+ diffrate_tau_axial[is] + diffrate_taubar_axial[is];
 
 	  sum_events_iso+= diffrate_e_interf[is] + diffrate_ebar_interf[is] + diffrate_mu_interf[is]+ diffrate_mubar_interf[is]+ diffrate_tau_interf[is] + diffrate_taubar_interf[is];
+
+
+	  sum_events_iso+= diffrate_e_mag[is] + diffrate_ebar_mag[is] + diffrate_mu_mag[is]+ diffrate_mubar_mag[is]+ diffrate_tau_mag[is] + diffrate_taubar_mag[is];
+
+
 
 	  sum_events_iso *= norm_factor*recoil_eff_factor;
 
@@ -766,7 +846,7 @@ int main(int argc, char * argv[] )
 
 
 
-	outfile << Erec<<scientific<<" "<<sum_diffrate_e_vec<<" "<<sum_diffrate_ebar_vec<<" "<<sum_diffrate_mu_vec<<" "<<sum_diffrate_mubar_vec<<" "<<sum_diffrate_tau_vec<<" "<<sum_diffrate_taubar_vec<<" "<<sum_diffrate_e_axial<<" "<<sum_diffrate_ebar_axial<<" "<<sum_diffrate_mu_axial<<" "<<sum_diffrate_mubar_axial<<" "<<sum_diffrate_tau_axial<<" "<<sum_diffrate_taubar_axial<<" "<<sum_diffrate_e_interf<<" "<<sum_diffrate_ebar_interf<<" "<<sum_diffrate_mu_interf<<" "<<sum_diffrate_mubar_interf<<" "<<sum_diffrate_tau_interf<<" "<<sum_diffrate_taubar_interf <<std::endl;
+     outfile << Erec<<scientific<<" "<<sum_diffrate_e_vec<<" "<<sum_diffrate_ebar_vec<<" "<<sum_diffrate_mu_vec<<" "<<sum_diffrate_mubar_vec<<" "<<sum_diffrate_tau_vec<<" "<<sum_diffrate_taubar_vec<<" "<<sum_diffrate_e_axial<<" "<<sum_diffrate_ebar_axial<<" "<<sum_diffrate_mu_axial<<" "<<sum_diffrate_mubar_axial<<" "<<sum_diffrate_tau_axial<<" "<<sum_diffrate_taubar_axial<<" "<<sum_diffrate_e_interf<<" "<<sum_diffrate_ebar_interf<<" "<<sum_diffrate_mu_interf<<" "<<sum_diffrate_mubar_interf<<" "<<sum_diffrate_tau_interf<<" "<<sum_diffrate_taubar_interf <<" "<<sum_diffrate_e_mag<<" "<<sum_diffrate_ebar_mag<<" "<<sum_diffrate_mu_mag<<" "<<sum_diffrate_mubar_mag<<" "<<sum_diffrate_tau_mag<<" "<<sum_diffrate_taubar_mag<<std::endl;
 	// Reset the format
      std::cout.unsetf(ios::fixed | ios::scientific);
      
@@ -774,6 +854,8 @@ int main(int argc, char * argv[] )
 	events = sum_diffrate_e_vec + sum_diffrate_ebar_vec + sum_diffrate_mu_vec+ sum_diffrate_mubar_vec+ sum_diffrate_tau_vec + sum_diffrate_taubar_vec;
 	events += sum_diffrate_e_axial + sum_diffrate_ebar_axial + sum_diffrate_mu_axial+ sum_diffrate_mubar_axial+ sum_diffrate_tau_axial + sum_diffrate_taubar_axial;
         events += sum_diffrate_e_interf + sum_diffrate_ebar_interf + sum_diffrate_mu_interf+ sum_diffrate_mubar_interf+ sum_diffrate_tau_interf + sum_diffrate_taubar_interf;
+
+        events += sum_diffrate_e_mag + sum_diffrate_ebar_mag + sum_diffrate_mu_mag+ sum_diffrate_mubar_mag+ sum_diffrate_tau_mag + sum_diffrate_taubar_mag;
 
 	totevents+=events*erecstep;
 
@@ -1140,66 +1222,70 @@ int main(int argc, char * argv[] )
 
       std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
 
+      if (qcsmearing != "none") {
       // Poisson smear includes the zero bin
-      DetectorResponse* qcsmear = new DetectorResponse();
+	DetectorResponse* qcsmear = new DetectorResponse();
 
-      qcsmear->SetQCBinning(qcbinning);
-      qcsmear->SetNSmearBin(int(maxqc/qcbinning)+1);
-      qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
-
-      if (qcsmearing == "poisson") {
-	qcsmear->SetPoissonSmearingMatrix();
-
-      } else {
-	std::string qcsmearfilename;
-	qcsmearfilename = "gs/"+std::string(gsname)+"_qcsmear.txt";
-	qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
-	qcsmear->ReadGSPolyFile();
-	qcsmear->SetGaussSmearingMatrix();
-      }
-
-
-      std::cout << "do qc smearing" <<std::endl;
-	// Do the smearing
-      std::map<double,double> _smearedqcmap = qcsmear->Smear(_qcmapall);
-     
-      
-      // Output the qc distribution, applying efficiency if requested
-      // (should not also have recoil or quenched efficiency)
-
-      std::ofstream qcoutfile;
-      outfilename = "out/sns_diff_rates_qc-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+	qcsmear->SetQCBinning(qcbinning);
+	qcsmear->SetNSmearBin(int(maxqc/qcbinning)+1);
+	qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
 	
-      std::cout << outfilename << std::endl;
-      qcoutfile.open(outfilename);
-      
-      double totev = 0.;
-      double totevunsmeared = 0.;
+	if (qcsmearing == "poisson") {
+	  qcsmear->SetPoissonSmearingMatrix();
+	  
+	} else {
+	  std::string qcsmearfilename;
+	  qcsmearfilename = "gs/"+std::string(gsname)+"_qcsmear.txt";
+	  qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
+	  qcsmear->ReadGSPolyFile();
+	  qcsmear->SetGaussSmearingMatrix();
+	}
 
-      for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
+
+	std::cout << "do qc smearing" <<std::endl;
+	// Do the smearing
+	std::map<double,double> _smearedqcmap = qcsmear->Smear(_qcmapall);
+	
+      
+	// Output the qc distribution, applying efficiency if requested
+	// (should not also have recoil or quenched efficiency)
+	
+	std::ofstream qcoutfile;
+	outfilename = "out/sns_diff_rates_qc-alliso-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
+	
+	std::cout << outfilename << std::endl;
+	qcoutfile.open(outfilename);
+	
+	double totev = 0.;
+	double totevunsmeared = 0.;
+	
+	for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
 	  
 	// Apply the qc efficiency here, if requested
 	
-	qc = double(iqc);
-	double qc_eff_factor = 1.;
+	  qc = double(iqc);
+	  double qc_eff_factor = 1.;
 	
-	if (iqc>=qcthresh) {
-	  if (effname != "none" && eff_type == "qc"){
-	    qc_eff_factor = detresp->efficnum(qc);	    
-	  }
+	  if (iqc>=qcthresh) {
+	    if (effname != "none" && eff_type == "qc"){
+	      qc_eff_factor = detresp->efficnum(qc);	    
+	    }
 	  
-	  qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
-	  // It's events per qc bin
-	  totev += _smearedqcmap[qc]*qc_eff_factor*qcbinning;
-	  totevunsmeared += _qcmapall[qc]*qc_eff_factor*qcbinning;
+	    qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
+	    // It's events per qc bin
+	    totev += _smearedqcmap[qc]*qc_eff_factor*qcbinning;
+	    totevunsmeared += _qcmapall[qc]*qc_eff_factor*qcbinning;
+	  }
 	}
-      }
       
 
-      qcoutfile.close();
+	qcoutfile.close();
 
       
-      cout << "Total events: "<<totev<<" unsmeared "<<totevunsmeared<<endl;
+	cout << "Total qc events: "<<totev<<" unsmeared "<<totevunsmeared<<endl;
+
+      } // End of do qc smearing case
+
     }  // End of do-quenching case
 
 
