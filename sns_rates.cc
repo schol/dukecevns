@@ -26,7 +26,7 @@ int main(int argc, char * argv[] )
 {
 
   if (argc<2) {
-    std::cout << "Usage:  ./sns_diff_rates [jsonfile]"<<std::endl;
+    std::cout << "Usage:  ./sns_rates [jsonfile]"<<std::endl;
     exit(0);
   }
 
@@ -1234,8 +1234,10 @@ int main(int argc, char * argv[] )
 	  qcsmear->SetPoissonSmearingMatrix();
 	  
 	} else {
+	  std::string qcgsname = j["detectorresponse"]["qcgsname"];
+
 	  std::string qcsmearfilename;
-	  qcsmearfilename = "gs/"+std::string(gsname)+"_qcsmear.txt";
+	  qcsmearfilename = "gs/"+std::string(qcgsname)+"_qcsmear.txt";
 	  qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
 	  qcsmear->ReadGSPolyFile();
 	  qcsmear->SetGaussSmearingMatrix();
