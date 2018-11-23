@@ -1134,40 +1134,45 @@ int main(int argc, char * argv[] )
       //      std::cout << "maxqc "<<maxqc<<" maxmeanqc "<<maxmeanqc<<std::endl;
       // Loop over qc's, as integers
 
-      int iqc;
-      double qc;
+      // Do the Poisson qc smearing if requested
 
-      double totinqc = 0.;
-      int qcbinning = j["detectorresponse"]["qcbinning"];
+      std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
+
+      if (qcsmearing != "none") {
       
+	int iqc;
+	double qc;
 
-      for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
+	double totinqc = 0.;
+	int qcbinning = j["detectorresponse"]["qcbinning"];
+      
+	for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
 
-	// Interpolate dNdqc from the quenchedmap
+	  // Interpolate dNdqc from the quenchedmap
 
-	if (qc<=maxmeanqc+0.01) {
-	  qc = double(iqc);
-
-
-	  typedef std::map<double, double>::const_iterator i_t;
+	  if (qc<=maxmeanqc+0.01) {
+	    qc = double(iqc);
 	  
-	  //	  double mevee = qc/qcperMeVee;
+
+	    typedef std::map<double, double>::const_iterator i_t;
 	  
+	    //	  double mevee = qc/qcperMeVee;
+	    
 	  // Do a more fine-grained interpolation and integrate over qc bin,
 	  // to reduce binned integration error
 	  // Not always really necessary
 
-	  double fracqc;
-	  double qcstep = 0.1;
+	    double fracqc;
+	    double qcstep = 0.1*qcbinning;
 	  
-	  double dndqcinbin=0.;
-	  double dndqcinterp;
-	  double dndqc;
+	    double dndqcinbin=0.;
+	    double dndqcinterp;
+	    double dndqc;
 	  
-	  // if <qc+0.5 includes last point
-	  for (fracqc=qc-0.5;fracqc<qc+0.49;fracqc+=qcstep) {
-	    if (fracqc>0) {
-	      
+	    // if <qc+0.5 includes last point
+	    for (fracqc=qc-0.5*qcbinning;fracqc<qc+0.49*qcbinning;fracqc+=qcstep) {
+	      if (fracqc>0) {
+		
 	      double mevee2 = fracqc/qcperMeVee;
 	      
 	      i_t i=_quenchedtot.upper_bound(mevee2);
@@ -1181,7 +1186,7 @@ int main(int argc, char * argv[] )
 		  dndqc =  i->second;
 		  
 		} else {
-	    
+		
 		i_t l=i; --l;
 		
 		const double delta=(mevee2- l->first)/(i->first - l->first);
@@ -1191,41 +1196,39 @@ int main(int argc, char * argv[] )
 	      
 	      //	      std::cout <<qc <<" "<<fracqc<<" "<<mevee2<<" "<<dndqc*qcstep<<" "<<dndqcinbin<<std::endl;
 	      
-	    } // End of >0 qc case
-	    
+	      } // End of >0 qc case
+	      
 	  } // End of loop over fractional qc integration
-	  //	std::cout <<qc <<" "<<mevee<<" "<<dndqcinbin<<std::endl;
+	    //	std::cout <<qc <<" "<<mevee<<" "<<dndqcinbin<<std::endl;
 	  
 	  
-	  dndqcinterp = dndqcinbin/qcperMeVee;
-	  
-	  if (isnan(dndqcinterp)) {dndqcinterp=0.;}
+	    dndqcinterp = dndqcinbin/qcperMeVee;
+	    
+	    if (isnan(dndqcinterp)) {dndqcinterp=0.;}
 	  
 	  //	if (qc>0) {
-	  totinqc += dndqcinterp;	
-	  //	}
-	  _qcmapall[qc] = dndqcinterp;
+	    totinqc += dndqcinterp;	
+	    //	}
+	    _qcmapall[qc] = dndqcinterp;
 
-	} else {
-
-	  // Pad the end with zeroes to allow for smearing
-	  _qcmapall[qc] = 0.;
-
-	} // end of qc<=maxmeanqc check
+	    //	    std::cout << qc<<" "<<dndqcinterp<<" "<<totinqc<<std::endl;
+	    
+	  } else {
+	    
+	    // Pad the end with zeroes to allow for smearing
+	    _qcmapall[qc] = 0.;
+	    
+	  } // end of qc<=maxmeanqc check
+	  
+	  
+	}
 	
-
-      }
-
-      std::cout << "Integral of qc dist, including zero bin: "<<totinqc<<std::endl;
-
-      // Do the Poisson qc smearing if requested
-
-      std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
-
-      if (qcsmearing != "none") {
-      // Poisson smear includes the zero bin
+	std::cout << "Integral of qc dist, including zero bin: "<<totinqc<<std::endl;
+	
+	
+	// Poisson smear includes the zero bin
 	DetectorResponse* qcsmear = new DetectorResponse();
-
+	
 	qcsmear->SetQCBinning(qcbinning);
 	qcsmear->SetNSmearBin(int(maxqc/qcbinning)+1);
 	qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
@@ -1275,8 +1278,8 @@ int main(int argc, char * argv[] )
 	  
 	    qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
 	    // It's events per qc bin
-	    totev += _smearedqcmap[qc]*qc_eff_factor*qcbinning;
-	    totevunsmeared += _qcmapall[qc]*qc_eff_factor*qcbinning;
+	    totev += _smearedqcmap[qc]*qc_eff_factor;
+	    totevunsmeared += _qcmapall[qc]*qc_eff_factor;
 	  }
 	}
       
