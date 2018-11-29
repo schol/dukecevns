@@ -699,5 +699,13 @@ void DetectorResponse::SetStepThresh(double thresh) {
 
 double DetectorResponse::GetStepThresh() { return step_thresh;}
 
+void DetectorResponse::SetUpperThresh(double thresh) {
+
+  upper_thresh = thresh;
+ 
+}
+
+double DetectorResponse::GetUpperThresh() { return upper_thresh;}
+
 
 /////// 

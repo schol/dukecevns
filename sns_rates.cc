@@ -129,6 +129,10 @@ int main(int argc, char * argv[] )
   double eethresh = 0.; //MeVr
   double qcthresh = 0.; //Collected charge
 
+  double recoilupperthresh = 0.; //MeVr
+  double eeupperthresh = 0.; //MeVr
+  double qcupperthresh = 0.; //Collected charge
+
   std::string eff_type = j["detectorresponse"]["efftype"];
   detresp->SetEfficType(eff_type.c_str());
   
@@ -145,12 +149,18 @@ int main(int argc, char * argv[] )
     if (eff_type == "erecoil") {
       recoilthresh = j["detectorresponse"]["stepthresh"];
       detresp->SetStepThresh(recoilthresh); // Not actually needed
+      recoilupperthresh = j["detectorresponse"]["upperthresh"];
+      detresp->SetUpperThresh(recoilupperthresh);
     } else if (eff_type == "eee") {
       eethresh = j["detectorresponse"]["stepthresh"];
       detresp->SetStepThresh(eethresh); 
+      eeupperthresh = j["detectorresponse"]["upperthresh"];
+      detresp->SetUpperThresh(eeupperthresh);
     } else if (eff_type == "qc") {
       qcthresh = j["detectorresponse"]["stepthresh"];
       detresp->SetStepThresh(qcthresh); 
+      qcupperthresh = j["detectorresponse"]["upperthresh"];
+      detresp->SetUpperThresh(qcupperthresh);
     } 
 
   }
@@ -397,7 +407,9 @@ int main(int argc, char * argv[] )
   
   //double recoilthresh = 0.013; //MeVr
   double erecstart = recoilthresh;
-  double erecend = erecmaxall;
+  double erecend = recoilupperthresh > recoilthresh ?
+                   std::min(erecmaxall, recoilupperthresh) :
+                   erecmaxall;
   //  double erecstep = 0.0001;
   double erecstep = 0.0001;
 
@@ -867,7 +879,10 @@ int main(int argc, char * argv[] )
 
   } // End of loop over Erec
 
-   std::cout << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
+   if (recoilupperthresh > recoilthresh)
+      std::cout << "Total events over "<< recoilthresh*1000.<<" keVr and under "<<recoilupperthresh*1000<<" keVr: "<<totevents<< std::endl;
+   else
+      std::cout << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
    std::cout << "Total recoil energy deposited:  "<< toterecoil<< std::endl;
 
    outfile.close();
@@ -881,7 +896,10 @@ int main(int argc, char * argv[] )
 
   
   integraloutfile << j << '\n';
-  integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
+  if (recoilupperthresh > recoilthresh)
+    integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr and under "<<recoilupperthresh*1000<<" keVr: "<<totevents<< std::endl;
+  else
+    integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
 
   integraloutfile.close();
 
@@ -1101,7 +1119,8 @@ int main(int argc, char * argv[] )
 	  // Apply the Eee efficiency here, if requested
 
 	  double eee_eff_factor = 1.;
-	  if (eeei>=eethresh) {
+	  if (eeei>=eethresh &&
+              (eeupperthresh > eethresh ? eeei <= eeupperthresh : true)) {
 	    if (effname != "none" && eff_type == "eee"){
 	      eee_eff_factor = detresp->efficnum(eeei);	    
 	    }
@@ -1268,7 +1287,8 @@ int main(int argc, char * argv[] )
 	  qc = double(iqc);
 	  double qc_eff_factor = 1.;
 	
-	  if (iqc>=qcthresh) {
+	  if (iqc>=qcthresh &&
+              (qcupperthresh > qcthresh ? iqc <= qcupperthresh : true)) {
 	    if (effname != "none" && eff_type == "qc"){
 	      qc_eff_factor = detresp->efficnum(qc);	    
 	    }
