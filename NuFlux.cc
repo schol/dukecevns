@@ -41,8 +41,17 @@ double PiDAR::fluxval(double Enu, int flavor, double ebinsize)
     flux = 0.;
   }
 
-  //  std::cout << Enu<<" "<<flavor<<" "<<ebinsize<<" "<<flux<<std::endl;
+  // Oscillate if requested
 
+  //  std::cout << "1: "<< flux << std::endl;
+  if (doosc==1) {
+    // Simple sterile disappearance
+    flux *= (1-sin22th*pow(sin(1.27*dm2*(baseline/100.)/Enu),2));
+  }
+
+  //  std::cout << 1.-sin22th<<" "<<dm2<<" "<<Enu<<" "<<" "<<baseline<<" "<<pow(sin(1.27*dm2*baseline/Enu),2)<<std::endl;
+  //std::cout << flux << std::endl;
+  
   return flux;
 
 }
@@ -370,6 +379,21 @@ void NuFlux::SetNorm(double normval) {
 
 double NuFlux::GetNorm() {
   return norm;
+}
+
+
+void NuFlux::SetOscParam(double s, double m, double b) {
+  doosc = 1;
+  sin22th = s;
+  dm2 = m;
+  baseline = b;
+}
+
+void NuFlux::GetOscParam(double* oscparam) {
+
+  oscparam[0]=sin22th;
+  oscparam[1]= dm2;
+
 }
 
 ////

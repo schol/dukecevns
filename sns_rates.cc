@@ -77,6 +77,8 @@ int main(int argc, char * argv[] )
 
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
+
+
   // Set up the form factor
 
   std::string ffname = j["formfactor"]["type"];
@@ -120,6 +122,21 @@ int main(int argc, char * argv[] )
   snsflux->SetNorm(nuspersecperflavor/(4*M_PI*dist*dist));
   // Gives flux per pidk per energy bin per second, energy bin in MeV,  normalize for 5e14 decays/s 
 
+
+  // Set up oscillations
+
+
+  if (j.find("doosc") != j.end()) {
+    int doosc = j["doosc"];
+    if (doosc == 1) {
+      double sin22th = j["osc"]["sin22th"];
+      double dm2 = j["osc"]["dm2"];
+      snsflux->SetOscParam(sin22th,dm2,dist);
+    }
+  }
+
+
+  
   // Set up the detector response-- this is an overall detector response
 
   
@@ -470,7 +487,7 @@ int main(int argc, char * argv[] )
 
      // Sum for each component,  not quenched
 
-    double sum_diffrate_e_vec=0;
+     double sum_diffrate_e_vec=0;
      double sum_diffrate_ebar_vec=0;
      double sum_diffrate_mu_vec=0;
      double sum_diffrate_mubar_vec=0;
@@ -586,26 +603,140 @@ int main(int argc, char * argv[] )
 	double GV_sm_wff_tau= GV_sm_wff;
 	double GV_sm_wff_taubar= GV_sm_wff;
 
+	double chgradcorr_e = 0.;
+	double chgradcorr_ebar = 0.;
+	double chgradcorr_mu = 0.;
+	double chgradcorr_mubar = 0.;
+	double chgradcorr_tau = 0.;
+	double chgradcorr_taubar = 0.;
+
 	if  (j["couplings"]["chargeradiusfactor"] == "erler") {
-	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_ebar= Z*(gv[0]+chgradcorr(-1,1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_mubar= Z*(gv[0]+chgradcorr(-2,1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,1))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_taubar= Z*(gv[0]+chgradcorr(-3,1))*ffpvval+Nn*gv[1]*ffnvval;
+
+	  chgradcorr_e = chgradcorr(1,1);
+	  chgradcorr_ebar = chgradcorr(-1,1);
+	  chgradcorr_mu = chgradcorr(2,1);
+	  chgradcorr_mubar = chgradcorr(-2,1);
+	  chgradcorr_tau = chgradcorr(3,1);
+	  chgradcorr_taubar = chgradcorr(-3,1);
 
 	}
 
+	
 	if  (j["couplings"]["chargeradiusfactor"] == "giunti") {
-	  GV_sm_wff_e= Z*(gv[0]+chgradcorr(1,2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_ebar= Z*(gv[0]+chgradcorr(-1,2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_mu= Z*(gv[0]+chgradcorr(2,2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_mubar= Z*(gv[0]+chgradcorr(-2,2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_tau= Z*(gv[0]+chgradcorr(3,2))*ffpvval+Nn*gv[1]*ffnvval;
-	  GV_sm_wff_taubar= Z*(gv[0]+chgradcorr(-3,2))*ffpvval+Nn*gv[1]*ffnvval;
+
+	  chgradcorr_e = chgradcorr(1,2);
+	  chgradcorr_ebar = chgradcorr(-1,2);
+	  chgradcorr_mu = chgradcorr(2,2);
+	  chgradcorr_mubar = chgradcorr(-2,2);
+	  chgradcorr_tau = chgradcorr(3,2);
+	  chgradcorr_taubar = chgradcorr(-3,2);
+
 	}
 
 
+	GV_sm_wff_e= Z*(gv[0]+chgradcorr_e)*ffpvval+Nn*gv[1]*ffnvval;
+	GV_sm_wff_ebar= Z*(gv[0]+chgradcorr_ebar)*ffpvval+Nn*gv[1]*ffnvval;
+	GV_sm_wff_mu= Z*(gv[0]+chgradcorr_mu)*ffpvval+Nn*gv[1]*ffnvval;
+	GV_sm_wff_mubar= Z*(gv[0]+chgradcorr_mubar)*ffpvval+Nn*gv[1]*ffnvval;
+	GV_sm_wff_tau= Z*(gv[0]+chgradcorr_tau)*ffpvval+Nn*gv[1]*ffnvval;
+	GV_sm_wff_taubar= Z*(gv[0]+chgradcorr_taubar)*ffpvval+Nn*gv[1]*ffnvval;
+	
+	// Default is SM
+	double GV_wff_e = GV_sm_wff_e;
+	double GV_wff_ebar = GV_sm_wff_ebar;
+	double GV_wff_mu = GV_sm_wff_mu;
+	double GV_wff_mubar = GV_sm_wff_mubar;
+	double GV_wff_tau = GV_sm_wff_tau;
+	double GV_wff_taubar = GV_sm_wff_taubar;
+
+	// Axial couplings are SM
+	double GA_wff = GA_sm_wff;
+	double GA_bar_wff = GA_sm_bar_wff;
+
+	double eeeuV, eeedV;
+	double eetauuV,  eetaudV;
+	double eemuuV, eemudV;
+	double emumuuV,  emumudV;
+	double emutauuV,  emutaudV;
+	double etautauuV,  etautaudV;
+
+	// NSI vector couplings
+	int donsi = 0;
+	if (j.find("nsi") != j.end()) {
+	  donsi = j["nsi"];
+	}
+	if (donsi != 0) {
+
+	  eeeuV = j["couplings"]["eeeuV"];
+	  eeedV = j["couplings"]["eeedV"];
+	  eemuuV = j["couplings"]["eemuuV"];
+	  eemudV = j["couplings"]["eemudV"];
+	  eetauuV = j["couplings"]["eetauuV"];
+	  eetaudV = j["couplings"]["eetaudV"];
+	  emumuuV = j["couplings"]["emumuuV"];
+	  emumudV = j["couplings"]["emumudV"];
+	  emutauuV = j["couplings"]["emutauuV"];
+	  emutaudV = j["couplings"]["emutaudV"];
+	  etautauuV = j["couplings"]["etautauuV"];
+	  etautaudV = j["couplings"]["etautaudV"];
+
+	  // Not completely sure I am handling form factors properly for flavor-changing, but should be OK for equal form factors
+	  double gV_nsi_wff_e= sqrt(pow(Z*(gv[0]+chgradcorr_e+2*eeeuV+ eeedV)*ffpvval
+					+Nn*(gv[1]+eeeuV+2*eeedV)*ffnvval,2)
+				    +pow(Z*(2*eemuuV+eemudV)*ffpvval
+					 +Nn*(eemuuV+2*eemudV)*ffnvval,2)
+				   +pow(Z*(2*eetauuV+eetaudV)*ffpvval
+					+Nn*(eetauuV+2*eetaudV)*ffnvval,2));
+
+	  double gV_nsi_wff_ebar= sqrt(pow(Z*(gv[0]+chgradcorr_ebar+2*eeeuV+ eeedV)*ffpvval
+					+Nn*(gv[1]+eeeuV+2*eeedV)*ffnvval,2)
+				    +pow(Z*(2*eemuuV+eemudV)*ffpvval
+					 +Nn*(eemuuV+2*eemudV)*ffnvval,2)
+				   +pow(Z*(2*eetauuV+eetaudV)*ffpvval
+					+Nn*(eetauuV+2*eetaudV)*ffnvval,2));
+
+
+	  double gV_nsi_wff_mu= sqrt(pow(Z*(gv[0]+chgradcorr_mu+2*emumuuV+ emumudV)*ffpvval
+					+Nn*(gv[1]+emumuuV+2*emumudV)*ffnvval,2)
+				    +pow(Z*(2*eemuuV+eemudV)*ffpvval
+					 +Nn*(eemuuV+2*eemudV)*ffnvval,2)
+				   +pow(Z*(2*emutauuV+emutaudV)*ffpvval
+					+Nn*(emutauuV+2*emutaudV)*ffnvval,2));
+
+	  double gV_nsi_wff_mubar= sqrt(pow(Z*(gv[0]+chgradcorr_mubar
+					       +2*emumuuV+ emumudV)*ffpvval
+					+Nn*(gv[1]+emumuuV+2*emumudV)*ffnvval,2)
+				    +pow(Z*(2*eemuuV+eemudV)*ffpvval
+					 +Nn*(eemuuV+2*eemudV)*ffnvval,2)
+				   +pow(Z*(2*emutauuV+emutaudV)*ffpvval
+					+Nn*(emutauuV+2*emutaudV)*ffnvval,2));
+
+	  double gV_nsi_wff_tau= sqrt(pow(Z*(gv[0]+chgradcorr_tau+2*etautauuV+ etautaudV)*ffpvval
+					+Nn*(gv[1]+etautauuV+2*etautaudV)*ffnvval,2)
+				    +pow(Z*(2*eetauuV+eetaudV)*ffpvval
+					 +Nn*(eetauuV+2*eetaudV)*ffnvval,2)
+				   +pow(Z*(2*emutauuV+emutaudV)*ffpvval
+					+Nn*(emutauuV+2*emutaudV)*ffnvval,2));
+
+	  double gV_nsi_wff_taubar= sqrt(pow(Z*(gv[0]+chgradcorr_taubar
+					       +2*etautauuV+ etautaudV)*ffpvval
+					+Nn*(gv[1]+etautauuV+2*etautaudV)*ffnvval,2)
+				    +pow(Z*(2*eetauuV+eetaudV)*ffpvval
+					 +Nn*(eetauuV+2*eetaudV)*ffnvval,2)
+				   +pow(Z*(2*emutauuV+emutaudV)*ffpvval
+					+Nn*(emutauuV+2*emutaudV)*ffnvval,2));
+
+
+	  GV_wff_e = gV_nsi_wff_e;
+	  GV_wff_ebar = gV_nsi_wff_ebar;
+	  GV_wff_mu = gV_nsi_wff_mu;
+	  GV_wff_mubar = gV_nsi_wff_mubar;
+	  GV_wff_tau = gV_nsi_wff_tau;
+	  GV_wff_taubar = gV_nsi_wff_taubar;
+	  
+	} // End of donsi case
+	
+	
 	// Magnetic moment..by flavor not quite right but OK for now
 
 	double munu_e=0.;
@@ -726,28 +857,28 @@ int main(int argc, char * argv[] )
 	 // Now multiply by target-dependent factors and add up this recoil energy bin
 
 
-	 diffrate_e_vec[is] += ntfac*pow(GV_sm_wff_e,2)*mass_fraction[is]*drate_e_vec*wnue;
-	 diffrate_ebar_vec[is] += ntfac*pow(GV_sm_wff_ebar,2)*mass_fraction[is]*drate_ebar_vec;
-	 diffrate_mu_vec[is] += ntfac*pow(GV_sm_wff_mu,2)*mass_fraction[is]*drate_mu_vec*mufact*wnumu;
-	 diffrate_mubar_vec[is] += ntfac*pow(GV_sm_wff_mubar,2)*mass_fraction[is]*drate_mubar_vec*mufact*wnumubar;
-	 diffrate_tau_vec[is] +=  ntfac*pow(GV_sm_wff_tau,2)*mass_fraction[is]*drate_tau_vec;
-	 diffrate_taubar_vec[is] += ntfac*pow(GV_sm_wff_taubar,2)*mass_fraction[is]*drate_taubar_vec;
+	 diffrate_e_vec[is] += ntfac*pow(GV_wff_e,2)*mass_fraction[is]*drate_e_vec*wnue;
+	 diffrate_ebar_vec[is] += ntfac*pow(GV_wff_ebar,2)*mass_fraction[is]*drate_ebar_vec;
+	 diffrate_mu_vec[is] += ntfac*pow(GV_wff_mu,2)*mass_fraction[is]*drate_mu_vec*mufact*wnumu;
+	 diffrate_mubar_vec[is] += ntfac*pow(GV_wff_mubar,2)*mass_fraction[is]*drate_mubar_vec*mufact*wnumubar;
+	 diffrate_tau_vec[is] +=  ntfac*pow(GV_wff_tau,2)*mass_fraction[is]*drate_tau_vec;
+	 diffrate_taubar_vec[is] += ntfac*pow(GV_wff_taubar,2)*mass_fraction[is]*drate_taubar_vec;
 
 
-	 diffrate_e_axial[is] += ntfac*pow(GA_sm_wff,2)*mass_fraction[is]*drate_e_axial*wnue;
-	 diffrate_ebar_axial[is] += ntfac*pow(GA_sm_bar_wff,2)*mass_fraction[is]*drate_ebar_axial;
-	 diffrate_mu_axial[is] += ntfac*pow(GA_sm_wff,2)*mass_fraction[is]*drate_mu_axial*mufact*wnumu;
-	 diffrate_mubar_axial[is] += ntfac*pow(GA_sm_bar_wff,2)*mass_fraction[is]*drate_mubar_axial*mufact*wnumubar;
-	 diffrate_tau_axial[is] +=  ntfac*pow(GA_sm_wff,2)*mass_fraction[is]*drate_tau_axial;
-	 diffrate_taubar_axial[is] +=  ntfac*pow(GA_sm_bar_wff,2)*mass_fraction[is]*drate_taubar_axial;
+	 diffrate_e_axial[is] += ntfac*pow(GA_wff,2)*mass_fraction[is]*drate_e_axial*wnue;
+	 diffrate_ebar_axial[is] += ntfac*pow(GA_bar_wff,2)*mass_fraction[is]*drate_ebar_axial;
+	 diffrate_mu_axial[is] += ntfac*pow(GA_wff,2)*mass_fraction[is]*drate_mu_axial*mufact*wnumu;
+	 diffrate_mubar_axial[is] += ntfac*pow(GA_bar_wff,2)*mass_fraction[is]*drate_mubar_axial*mufact*wnumubar;
+	 diffrate_tau_axial[is] +=  ntfac*pow(GA_wff,2)*mass_fraction[is]*drate_tau_axial;
+	 diffrate_taubar_axial[is] +=  ntfac*pow(GA_bar_wff,2)*mass_fraction[is]*drate_taubar_axial;
 
 
-	 diffrate_e_interf[is] += ntfac*GV_sm_wff_e*GA_sm_wff*mass_fraction[is]*drate_e_interf*wnue;
-	 diffrate_ebar_interf[is] += ntfac*GV_sm_wff_ebar*GA_sm_bar_wff*mass_fraction[is]*drate_ebar_interf;
-	 diffrate_mu_interf[is] += ntfac*GV_sm_wff_mu*GA_sm_wff*mass_fraction[is]*drate_mu_interf*mufact*wnumu;
-	 diffrate_mubar_interf[is] += ntfac*GV_sm_wff_mubar*GA_sm_bar_wff*mass_fraction[is]*drate_mubar_interf*mufact*wnumubar;
-	 diffrate_tau_interf[is] +=  ntfac*GV_sm_wff_tau*GA_sm_wff*mass_fraction[is]*drate_tau_interf;
-	 diffrate_taubar_interf[is] +=  ntfac*GV_sm_wff_taubar*GA_sm_bar_wff*mass_fraction[is]*drate_taubar_interf;
+	 diffrate_e_interf[is] += ntfac*GV_wff_e*GA_wff*mass_fraction[is]*drate_e_interf*wnue;
+	 diffrate_ebar_interf[is] += ntfac*GV_wff_ebar*GA_bar_wff*mass_fraction[is]*drate_ebar_interf;
+	 diffrate_mu_interf[is] += ntfac*GV_wff_mu*GA_wff*mass_fraction[is]*drate_mu_interf*mufact*wnumu;
+	 diffrate_mubar_interf[is] += ntfac*GV_wff_mubar*GA_bar_wff*mass_fraction[is]*drate_mubar_interf*mufact*wnumubar;
+	 diffrate_tau_interf[is] +=  ntfac*GV_wff_tau*GA_wff*mass_fraction[is]*drate_tau_interf;
+	 diffrate_taubar_interf[is] +=  ntfac*GV_wff_taubar*GA_bar_wff*mass_fraction[is]*drate_taubar_interf;
 
 	 diffrate_e_mag[is] += ntfac*pow(munu_e,2)*pow(Z,2)*mass_fraction[is]*drate_e_mag*wnue;
 	 diffrate_ebar_mag[is] += ntfac*pow(munu_ebar,2)*pow(Z,2)*mass_fraction[is]*drate_ebar_mag;
@@ -818,7 +949,7 @@ int main(int argc, char * argv[] )
 	  }
 
 
-	  //	 std::cout << is<<" "<<"Erec "<<Erec<<" mass frac "<<mass_fraction[is]<<" "<<" ntfac "<<ntfac<<" GV "<<GV_sm_wff<<" GA "<<GA_sm_wff<<std::endl;
+	  //	 std::cout << is<<" "<<"Erec "<<Erec<<" mass frac "<<mass_fraction[is]<<" "<<" ntfac "<<ntfac<<" GV "<<GV_wff<<" GA "<<GA_wff<<std::endl;
 
 	  //	 cout << "is, rate "<<is<<" "<<diffrate_e_vec[is]<<endl;
 
@@ -1153,40 +1284,45 @@ int main(int argc, char * argv[] )
       //      std::cout << "maxqc "<<maxqc<<" maxmeanqc "<<maxmeanqc<<std::endl;
       // Loop over qc's, as integers
 
-      int iqc;
-      double qc;
+      // Do the Poisson qc smearing if requested
 
-      double totinqc = 0.;
-      int qcbinning = j["detectorresponse"]["qcbinning"];
+      std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
+
+      if (qcsmearing != "none") {
       
+	int iqc;
+	double qc;
 
-      for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
+	double totinqc = 0.;
+	int qcbinning = j["detectorresponse"]["qcbinning"];
+      
+	for (iqc=0;iqc<=int(maxqc);iqc+=qcbinning) {
 
-	// Interpolate dNdqc from the quenchedmap
+	  // Interpolate dNdqc from the quenchedmap
 
-	if (qc<=maxmeanqc+0.01) {
 	  qc = double(iqc);
-
-
-	  typedef std::map<double, double>::const_iterator i_t;
+	  if (qc<=maxmeanqc+0.01) {
 	  
-	  //	  double mevee = qc/qcperMeVee;
+
+	    typedef std::map<double, double>::const_iterator i_t;
 	  
+	    //	  double mevee = qc/qcperMeVee;
+	    
 	  // Do a more fine-grained interpolation and integrate over qc bin,
 	  // to reduce binned integration error
 	  // Not always really necessary
 
-	  double fracqc;
-	  double qcstep = 0.1;
+	    double fracqc;
+	    double qcstep = 0.1*qcbinning;
 	  
-	  double dndqcinbin=0.;
-	  double dndqcinterp;
-	  double dndqc;
+	    double dndqcinbin=0.;
+	    double dndqcinterp;
+	    double dndqc;
 	  
-	  // if <qc+0.5 includes last point
-	  for (fracqc=qc-0.5;fracqc<qc+0.49;fracqc+=qcstep) {
-	    if (fracqc>0) {
-	      
+	    // if <qc+0.5 includes last point
+	    for (fracqc=qc-0.5*qcbinning;fracqc<qc+0.49*qcbinning;fracqc+=qcstep) {
+	      if (fracqc>0) {
+		
 	      double mevee2 = fracqc/qcperMeVee;
 	      
 	      i_t i=_quenchedtot.upper_bound(mevee2);
@@ -1200,7 +1336,7 @@ int main(int argc, char * argv[] )
 		  dndqc =  i->second;
 		  
 		} else {
-	    
+		
 		i_t l=i; --l;
 		
 		const double delta=(mevee2- l->first)/(i->first - l->first);
@@ -1210,41 +1346,39 @@ int main(int argc, char * argv[] )
 	      
 	      //	      std::cout <<qc <<" "<<fracqc<<" "<<mevee2<<" "<<dndqc*qcstep<<" "<<dndqcinbin<<std::endl;
 	      
-	    } // End of >0 qc case
-	    
+	      } // End of >0 qc case
+	      
 	  } // End of loop over fractional qc integration
-	  //	std::cout <<qc <<" "<<mevee<<" "<<dndqcinbin<<std::endl;
+	    //	std::cout <<qc <<" "<<mevee<<" "<<dndqcinbin<<std::endl;
 	  
 	  
-	  dndqcinterp = dndqcinbin/qcperMeVee;
-	  
-	  if (isnan(dndqcinterp)) {dndqcinterp=0.;}
+	    dndqcinterp = dndqcinbin/qcperMeVee;
+	    
+	    if (isnan(dndqcinterp)) {dndqcinterp=0.;}
 	  
 	  //	if (qc>0) {
-	  totinqc += dndqcinterp;	
-	  //	}
-	  _qcmapall[qc] = dndqcinterp;
+	    totinqc += dndqcinterp;	
+	    //	}
+	    _qcmapall[qc] = dndqcinterp;
 
-	} else {
-
-	  // Pad the end with zeroes to allow for smearing
-	  _qcmapall[qc] = 0.;
-
-	} // end of qc<=maxmeanqc check
+	    //	    std::cout << qc<<" "<<dndqcinterp<<" "<<totinqc<<std::endl;
+	    
+	  } else {
+	    
+	    // Pad the end with zeroes to allow for smearing
+	    _qcmapall[qc] = 0.;
+	    
+	  } // end of qc<=maxmeanqc check
+	  
+	  
+	}
 	
-
-      }
-
-      std::cout << "Integral of qc dist, including zero bin: "<<totinqc<<std::endl;
-
-      // Do the Poisson qc smearing if requested
-
-      std::string qcsmearing = j["detectorresponse"]["qcsmearing"];
-
-      if (qcsmearing != "none") {
-      // Poisson smear includes the zero bin
+	std::cout << "Integral of qc dist, including zero bin: "<<totinqc<<std::endl;
+	
+	
+	// Poisson smear includes the zero bin
 	DetectorResponse* qcsmear = new DetectorResponse();
-
+	
 	qcsmear->SetQCBinning(qcbinning);
 	qcsmear->SetNSmearBin(int(maxqc/qcbinning)+1);
 	qcsmear->SetMaxSmearEn(double(int(maxqc)+1));
@@ -1295,8 +1429,8 @@ int main(int argc, char * argv[] )
 	  
 	    qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
 	    // It's events per qc bin
-	    totev += _smearedqcmap[qc]*qc_eff_factor*qcbinning;
-	    totevunsmeared += _qcmapall[qc]*qc_eff_factor*qcbinning;
+	    totev += _smearedqcmap[qc]*qc_eff_factor;
+	    totevunsmeared += _qcmapall[qc]*qc_eff_factor;
 	  }
 	}
       

@@ -15,6 +15,12 @@ class NuFlux
   char fluxtype[80];
   double norm;
 
+  // Oscillation parameters... simple 2-param sterile osc but could expand to standard 3flav
+  int doosc=0;
+  double sin22th;
+  double dm2; // eV^2
+  double baseline; // in meters
+    
  public: 
   NuFlux();
   NuFlux(const char *);
@@ -31,6 +37,9 @@ class NuFlux
 
   void SetNorm(double);
   double GetNorm();
+
+  void SetOscParam(double, double, double);
+  void GetOscParam(double*);
 
 
 };
