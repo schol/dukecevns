@@ -75,23 +75,52 @@ double DetectorResponse::qfnumderiv(double erec)
 
   double qfnumderiv = 0.;
 
-  // Compute the derivative of the numerical map at value erec
+  // Compute the derivative of the numerical map at value erec... it's derivative of erec*qf
 
   typedef std::map<double, double>::const_iterator i_t;
 
   i_t i=_qfmap.upper_bound(erec);
 
-  if(i==_qfmap.end())
-    {
-      return (--i)->second;
-    }
-  if (i==_qfmap.begin())
-    {
-      return i->second;
-    }
-  i_t l=i; --l;
-  
-  const double delta=(i->second- l->second)/(i->first - l->first);
+  double delta;
+  double er1,er2;
+  double ee1,ee2;
+  double rise;
+  double run;
+
+  i_t l;
+  if(i==_qfmap.end()) {
+    // Actually same as normal case
+      i_t np = i; --np;
+      er1 = np->first;
+      er2 = i->first;
+      ee1 = np->second;
+      ee2 = i->second;
+      rise = ee2 * er2- ee1 * er1;
+      run = er2-er1;
+  }
+  else if (i==_qfmap.begin()){
+      i_t nl = i; nl++;
+      er1 = i->first;
+      er2 = nl->first;
+      ee1 = i->second;
+      ee2 = nl->second;
+      rise = ee2 * er2- ee1 * er1;
+      run = er2-er1;
+
+      
+  } else {
+    l=i; --l;
+    er1 = l->first;
+    er2 = i->first;
+    ee1 = l->second;
+    ee2 = i->second;
+    rise = ee2 * er2- ee1 * er1;
+    run = er2-er1;
+    
+  }
+
+  delta= rise/run;
+
   qfnumderiv= delta;
 
   if (isnan(qfnumderiv)) {qfnumderiv=0.;}

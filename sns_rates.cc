@@ -780,6 +780,7 @@ int main(int argc, char * argv[] )
 	 } else if (qftype == "numerical") {
 	  Eee[is][iq] = qffunc[is]->qfnum(Erec)*Erec;
 	  qfderiv = abs(qffunc[is]->qfnumderiv(Erec));
+
 	 }
 
 
