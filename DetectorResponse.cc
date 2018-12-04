@@ -92,7 +92,7 @@ double DetectorResponse::qfnumderiv(double erec)
     // Actually same as normal case
       i_t np = i; --np;
       er1 = np->first;
-      er2 = i->first;
+      er2 = erec;
       ee1 = np->second;
       ee2 = i->second;
       rise = ee2 * er2- ee1 * er1;
@@ -101,7 +101,7 @@ double DetectorResponse::qfnumderiv(double erec)
   else if (i==_qfmap.begin()){
       i_t nl = i; nl++;
       er1 = i->first;
-      er2 = nl->first;
+      er2 = erec;
       ee1 = i->second;
       ee2 = nl->second;
       rise = ee2 * er2- ee1 * er1;
@@ -111,7 +111,7 @@ double DetectorResponse::qfnumderiv(double erec)
   } else {
     l=i; --l;
     er1 = l->first;
-    er2 = i->first;
+    er2 = erec;
     ee1 = l->second;
     ee2 = i->second;
     rise = ee2 * er2- ee1 * er1;
