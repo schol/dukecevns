@@ -83,41 +83,46 @@ double DetectorResponse::qfnumderiv(double erec)
 
   double delta;
   double er1,er2;
-  double ee1,ee2;
+  double qf1,qf2;
   double rise;
   double run;
+  double qferec;
 
   i_t l;
   if(i==_qfmap.end()) {
     // Actually same as normal case
       i_t np = i; --np;
       er1 = np->first;
-      er2 = erec;
-      ee1 = np->second;
-      ee2 = i->second;
-      rise = ee2 * er2- ee1 * er1;
-      run = er2-er1;
+      er2 = i->first;
+      qf1 = np->second;
+      qf2 = i->second;
+
+      //      rise = qf2 * er2- qf1 * er1;
+      //run = er2-er1;
   }
   else if (i==_qfmap.begin()){
       i_t nl = i; nl++;
       er1 = i->first;
-      er2 = erec;
-      ee1 = i->second;
-      ee2 = nl->second;
-      rise = ee2 * er2- ee1 * er1;
-      run = er2-er1;
+      er2 = nl->first;
+      qf1 = i->second;
+      qf2 = nl->second;
 
       
   } else {
     l=i; --l;
     er1 = l->first;
-    er2 = erec;
-    ee1 = l->second;
-    ee2 = i->second;
-    rise = ee2 * er2- ee1 * er1;
-    run = er2-er1;
+    er2 = i->first;
+    
+    qf1 = l->second;
+    qf2 = i->second;
+
     
   }
+
+  qferec = qf1+(qf2-qf1)/(er2-er1)*(erec-er1);
+  
+  rise = qferec * erec - qf1 * er1;
+  run = erec-er1;
 
   delta= rise/run;
 
