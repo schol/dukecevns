@@ -120,10 +120,12 @@ double DetectorResponse::qfnumderiv(double erec)
   }
 
   qferec = qf1+(qf2-qf1)/(er2-er1)*(erec-er1);
-  
-  rise = qferec * erec - qf1 * er1;
-  run = erec-er1;
+  // This gives problems if erec=er1
+  //  rise = qferec * erec - qf1 * er1;
+  rise = qf2 * er2 - qf1 * er1;
+  run = er2-er1;
 
+  //  std::cout << er1<<" "<<er2<<" "<<erec<<" "<<qf1<<" "<<qf2<<" "<<qferec<<std::endl;
   delta= rise/run;
 
   qfnumderiv= delta;
