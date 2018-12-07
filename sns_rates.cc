@@ -780,7 +780,6 @@ int main(int argc, char * argv[] )
 	 } else if (qftype == "numerical") {
 	  Eee[is][iq] = qffunc[is]->qfnum(Erec)*Erec;
 	  qfderiv = abs(qffunc[is]->qfnumderiv(Erec));
-
 	 }
 
 
@@ -1245,11 +1244,10 @@ int main(int argc, char * argv[] )
 	smoutfile.open(outfilename);
 
 	double eeei=0.;
-
+	double totweff = 0.;
 	for (ieee=0;ieee<neeebin*2;ieee++) {
 
 	  // Apply the Eee efficiency here, if requested
-
 	  double eee_eff_factor = 1.;
 	  if (eeei>=eethresh &&
               (eeupperthresh > eethresh ? eeei <= eeupperthresh : true)) {
@@ -1258,11 +1256,14 @@ int main(int argc, char * argv[] )
 	    }
 	    eeei += eeestep;
 	    smoutfile << eeei<<" "<<_smearedmap[eeei]*eee_eff_factor<<std::endl;
+	    totweff += _smearedmap[eeei]*eee_eff_factor*eeestep;
+	  } else {
+	    eeei += eeestep;
 	  }
 	}
 
 	smoutfile.close();
-
+	std::cout << "Total smeared with efficiency: "<<totweff<<std::endl;
 
       } // End of do-smearing case
 
