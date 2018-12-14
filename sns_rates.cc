@@ -129,9 +129,12 @@ int main(int argc, char * argv[] )
   if (j.find("doosc") != j.end()) {
     int doosc = j["doosc"];
     if (doosc == 1) {
-      double sin22th = j["osc"]["sin22th"];
+      double ua4[3];
+      ua4[0] = j["osc"]["ue4"];
+      ua4[1] = j["osc"]["umu4"];
+      ua4[2] = j["osc"]["utau4"];
       double dm2 = j["osc"]["dm2"];
-      snsflux->SetOscParam(sin22th,dm2,dist);
+      snsflux->SetOscParam(ua4,dm2,dist);
     }
   }
 
