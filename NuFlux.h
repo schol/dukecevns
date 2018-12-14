@@ -17,7 +17,9 @@ class NuFlux
 
   // Oscillation parameters... simple 2-param sterile osc but could expand to standard 3flav
   int doosc=0;
-  double sin22th;
+  double sin22thes;
+  double sin22thmus;
+  double sin22thtaus;
   double dm2; // eV^2
   double baseline; // in meters
     
@@ -38,7 +40,7 @@ class NuFlux
   void SetNorm(double);
   double GetNorm();
 
-  void SetOscParam(double, double, double);
+  void SetOscParam(double*, double, double);
   void GetOscParam(double*);
 
 

@@ -44,9 +44,23 @@ double PiDAR::fluxval(double Enu, int flavor, double ebinsize)
   // Oscillate if requested
 
   //  std::cout << "1: "<< flux << std::endl;
+  double sin22th;
   if (doosc==1) {
+    
+    if (abs(flavor) == 1) {
+      sin22th = sin22thes;
+    } else if (abs(flavor) == 2) {
+      sin22th = sin22thmus;
+    }  else if (abs(flavor) == 3) {
+      sin22th = sin22thtaus;
+    } else {
+      sin22th = 0.;
+    }
+
     // Simple sterile disappearance
     flux *= (1-sin22th*pow(sin(1.27*dm2*(baseline/100.)/Enu),2));
+
+
   }
 
   //  std::cout << 1.-sin22th<<" "<<dm2<<" "<<Enu<<" "<<" "<<baseline<<" "<<pow(sin(1.27*dm2*baseline/Enu),2)<<std::endl;
@@ -382,17 +396,23 @@ double NuFlux::GetNorm() {
 }
 
 
-void NuFlux::SetOscParam(double s, double m, double b) {
+void NuFlux::SetOscParam(double* ua4, double m, double b) {
   doosc = 1;
-  sin22th = s;
+  // Unitarity constraint... user must ensure not violated
+  double us4_2 = 1.-pow(ua4[0],2)-pow(ua4[1],2)-pow(ua4[2],2);
+  sin22thes = 4.*pow(ua4[0],2)*us4_2;
+  sin22thmus = 4.*pow(ua4[0],2)*us4_2;
+  sin22thtaus = 4.*pow(ua4[0],2)*us4_2;
   dm2 = m;
   baseline = b;
 }
 
 void NuFlux::GetOscParam(double* oscparam) {
 
-  oscparam[0]=sin22th;
-  oscparam[1]= dm2;
+  oscparam[0]=sin22thes;
+  oscparam[1]=sin22thmus;
+  oscparam[2]=sin22thtaus;
+  oscparam[3]= dm2;
 
 }
 
