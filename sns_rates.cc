@@ -165,24 +165,22 @@ int main(int argc, char * argv[] )
     eff_filename = "eff/"+std::string(effname);
     detresp->SetEfficFilename(eff_filename.c_str());
     detresp->ReadEfficFile();
-  } else {
-    if (eff_type == "erecoil") {
-      recoilthresh = j["detectorresponse"]["stepthresh"];
-      detresp->SetStepThresh(recoilthresh); // Not actually needed
-      recoilupperthresh = j["detectorresponse"]["upperthresh"];
-      detresp->SetUpperThresh(recoilupperthresh);
-    } else if (eff_type == "eee") {
-      eethresh = j["detectorresponse"]["stepthresh"];
-      detresp->SetStepThresh(eethresh); 
-      eeupperthresh = j["detectorresponse"]["upperthresh"];
-      detresp->SetUpperThresh(eeupperthresh);
-    } else if (eff_type == "qc") {
-      qcthresh = j["detectorresponse"]["stepthresh"];
-      detresp->SetStepThresh(qcthresh); 
-      qcupperthresh = j["detectorresponse"]["upperthresh"];
-      detresp->SetUpperThresh(qcupperthresh);
-    } 
-
+  }
+  if (eff_type == "erecoil") {
+    recoilthresh = j["detectorresponse"]["stepthresh"];
+    detresp->SetStepThresh(recoilthresh); // Not actually needed
+    recoilupperthresh = j["detectorresponse"]["upperthresh"];
+    detresp->SetUpperThresh(recoilupperthresh);
+  } else if (eff_type == "eee") {
+    eethresh = j["detectorresponse"]["stepthresh"];
+    detresp->SetStepThresh(eethresh);
+    eeupperthresh = j["detectorresponse"]["upperthresh"];
+    detresp->SetUpperThresh(eeupperthresh);
+  } else if (eff_type == "qc") {
+    qcthresh = j["detectorresponse"]["stepthresh"];
+    detresp->SetStepThresh(qcthresh);
+    qcupperthresh = j["detectorresponse"]["upperthresh"];
+    detresp->SetUpperThresh(qcupperthresh);
   }
 
 
