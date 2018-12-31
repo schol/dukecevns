@@ -1011,10 +1011,12 @@ int main(int argc, char * argv[] )
 
   } // End of loop over Erec
 
-   if (recoilupperthresh > recoilthresh)
+   if (recoilupperthresh > recoilthresh) {
       std::cout << "Total events over "<< recoilthresh*1000.<<" keVr and under "<<recoilupperthresh*1000<<" keVr: "<<totevents<< std::endl;
-   else
+   }
+   else {
       std::cout << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
+   }
    std::cout << "Total recoil energy deposited:  "<< toterecoil<< std::endl;
 
    outfile.close();
@@ -1028,11 +1030,12 @@ int main(int argc, char * argv[] )
 
   
   integraloutfile << j << '\n';
-  if (recoilupperthresh > recoilthresh)
+  if (recoilupperthresh > recoilthresh) {
     integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr and under "<<recoilupperthresh*1000<<" keVr: "<<totevents<< std::endl;
-  else
+  }
+  else {
     integraloutfile << "Total events over "<< recoilthresh*1000.<<" keVr: "<<totevents<< std::endl;
-
+  }
   integraloutfile.close();
 
   // Output by isotope, integrated over flavor.

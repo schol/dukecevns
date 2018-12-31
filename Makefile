@@ -108,6 +108,16 @@ sns_rates: sns_rates.o $(libdiffspec)
 sns_rates.o: 
 	$(CXX) -o sns_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c sns_rates.cc
 
+nsi_rates: nsi_rates.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: nsi_rates.o
+nsi_rates.o: 
+	$(CXX) -o nsi_rates.o $(ROOTCFLAGS) $(CXXFLAGS) -c nsi_rates.cc
+
+
 reactor_rates: reactor_rates.o $(libdiffspec) 
 	$(RM) $@
 	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
@@ -127,6 +137,18 @@ formfactors: formfactors.o $(libdiffspec)
 .PHONY: formfactors.o
 formfactors.o: 
 	$(CXX) -o formfactors.o $(ROOTCFLAGS) $(CXXFLAGS) -c formfactors.cc
+
+
+detresp: detresp.o $(libdiffspec) 
+	$(RM) $@
+	$(CXX) -o $@ $(CXXFLAGS) -L. $^ $(ROOTLIBS) 
+
+
+.PHONY: detresp.o
+detresp.o: 
+	$(CXX) -o detresp.o $(ROOTCFLAGS) $(CXXFLAGS) -c detresp.cc
+
+
 
 
 
@@ -201,18 +223,6 @@ check_fluxes: check_fluxes.o get_flavor_weight.o $(libdiffspec)
 .PHONY: check_fluxes.o 
 check_fluxes.o: 
 	$(CXX) -o check_fluxes.o $(ROOTCFLAGS) $(CXXFLAGS) -c check_fluxes.cc
-
-
-
-detresp: detresp.o $(libdiffspec) 
-	$(RM) $@
-	$(CXX) -o $@ $(CXXFLAGS) -L. $^ $(ROOTLIBS)
-
-.PHONY: detresp.o
-detresp.o: 
-	$(CXX) -o detresp.o $(ROOTCFLAGS) $(CXXFLAGS) -c detresp.cc
-
-
 
 
 maptest: maptest.o $(libdiffspec) 

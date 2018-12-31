@@ -12,6 +12,11 @@ void sm_axial_couplings(int, int, double*);
 double GV_SM(int,int, int);
 double GA_SM(int,int, int, int, int, int);
 
+
+double GV_nsi_nonuniv(int, int, int, double, double, double, double, double, double, double, double, double, double);
+
+double GV_nsi_fc2(int, int, int, double, double, double, double, double, double, double, double, double, double);
+
 double chgradcorr(int,int);
 double mufactor(double);
 double taufactor(double);

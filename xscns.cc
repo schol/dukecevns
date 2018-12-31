@@ -44,6 +44,7 @@ double diffxscnmag(double knu, double erec) {
 
 }
 
+
 ///////////////////////
 
 // SM parameters
@@ -207,6 +208,8 @@ void sm_axial_couplings(int pdgyear, int flav, double* ga) {
 }
 
 
+
+// Note used
 double GV_SM(int pdgyear, int Z, int N) {
 
   // Default is 2015 PDG, from Erler paper
@@ -221,6 +224,7 @@ double GV_SM(int pdgyear, int Z, int N) {
 }
 
 
+// Not used
 double GA_SM(int pdgyear, int flav, int Z, int N, int Zdiff, int Ndiff){
 
   double ga[2];
@@ -270,3 +274,79 @@ double taufactor(double Q) {
   return taufact;
 }
 
+
+//////////////////////
+
+// NSI couplings... first two routines not used
+
+
+// This is the NSI factor for the T<<Enu approximation
+double GV_nsi_nonuniv(int flav, int Z, int N, double eeeuV, double eeedV, double eetauuV, double eetaudV, double eemuuV, double eemudV, double emumuuV, double emumudV, double emutauuV, double emutaudV){
+
+  // flav = 1: electron
+  // flav = 2: muon
+
+  // Ignoring nutau in initial state
+
+  //  cout << "Qw "<<Qw<<endl;
+  
+  double nonuniv=0;
+
+
+  if (flav == 1 ) {
+    nonuniv = Z*(2*eeeuV+ eeedV)+N*(eeeuV+2*eeedV);
+  }
+  else if (flav== 2) {
+    nonuniv = Z*(2*emumuuV+ emumudV)+N*(emumuuV+2*emumudV);
+  }
+    
+
+  return nonuniv;
+
+}
+
+
+// Already squared.
+double GV_nsi_fc2(int flav, int Z, int N, double eeeuV, double eeedV, double eetauuV, double eetaudV, double eemuuV, double eemudV, double emumuuV, double emumudV, double emutauuV, double emutaudV){
+
+  // flav = 1: electron
+  // flav = 2: muon
+
+  // Ignoring nutau in initial state
+
+  
+  double fc=0;
+
+  double nsi_factor = 0;
+  if (flav == 1 ) {
+    fc = Z*(2*eemuuV+eemudV)+N*(eemuuV+2*eemudV)
+      +Z*(2*eetauuV+eetaudV)+N*(eetauuV+2*eetaudV);
+  }
+  else if (flav== 2) {
+    fc = pow(Z*(2*eemuuV+eemudV)+N*(eemuuV+2*eemudV),2)
+      +pow(Z*(2*emutauuV+emutaudV)+N*(emutauuV+2*emutaudV),2);
+  }
+    
+
+  return fc;
+
+}
+
+void nsi_vector_couplings(double* nsi_gv, double epsilonu, double epsilond) {
+
+  // Output for proton and neutrons separately
+ 
+  double nsip;
+  double nsin;
+
+  nsip = 2*epsilonu + epsilond;
+  nsin = epsilonu + 2*epsilond;
+  
+
+  nsi_gv[0] = nsip;
+  nsi_gv[1] = nsin;
+  
+
+}
+
+// Ignoring axial NSIs
