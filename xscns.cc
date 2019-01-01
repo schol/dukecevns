@@ -317,7 +317,7 @@ double GV_nsi_fc2(int flav, int Z, int N, double eeeuV, double eeedV, double eet
   
   double fc=0;
 
-  double nsi_factor = 0;
+  //double nsi_factor = 0;
   if (flav == 1 ) {
     fc = Z*(2*eemuuV+eemudV)+N*(eemuuV+2*eemudV)
       +Z*(2*eetauuV+eetaudV)+N*(eetauuV+2*eetaudV);
