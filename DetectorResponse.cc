@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <ctime>
-#include <string>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 #include <math.h>
@@ -86,7 +86,6 @@ double DetectorResponse::qfnumderiv(double erec)
   double qf1,qf2;
   double rise;
   double run;
-  double qferec;
 
   i_t l;
   if(i==_qfmap.end()) {
@@ -119,7 +118,7 @@ double DetectorResponse::qfnumderiv(double erec)
     
   }
 
-  qferec = qf1+(qf2-qf1)/(er2-er1)*(erec-er1);
+  //double qferec = qf1+(qf2-qf1)/(er2-er1)*(erec-er1);
   // This gives problems if erec=er1
   //  rise = qferec * erec - qf1 * er1;
   rise = qf2 * er2 - qf1 * er1;
@@ -191,7 +190,7 @@ double DetectorResponse::qfpoly(double erec) {
 
   // erec in MeV
   double qf=0;
-  for (int i=0; i<qfpolycoeff.size();i++) {
+  for (size_t i=0; i<qfpolycoeff.size();i++) {
     if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
       qf += qfpolycoeff[i]*pow(erec,i);
     } else if (erec<qfpolyrange[0]) {
@@ -212,7 +211,7 @@ double DetectorResponse::qfpolyderiv(double erec) {
 
   // erec in MeV
   double qfderiv = 0;
-  for (int i=0; i<qfpolycoeff.size();i++) {
+  for (size_t i=0; i<qfpolycoeff.size();i++) {
       
     if (erec>=qfpolyrange[0]  && erec<=qfpolyrange[1] ) {
 
@@ -299,7 +298,7 @@ double DetectorResponse::gspoly(double en) {
 
   // erec in MeV
   double gs=0;
-  for (int i=0; i<gspolycoeff.size();i++) {
+  for (size_t i=0; i<gspolycoeff.size();i++) {
 
     if (en>=gspolyrange[0]  && en<=gspolyrange[1] ) {
       gs += gspolycoeff[i]*pow(en,i);

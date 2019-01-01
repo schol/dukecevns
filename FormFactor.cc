@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <string>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 #include <math.h>
