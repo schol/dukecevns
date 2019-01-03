@@ -1180,7 +1180,7 @@ int main(int argc, char * argv[] )
 	    const double delta=(eee- l->first)/(i->first - l->first);
 	    dndeee= delta*i->second +(1-delta)*l->second;
 	  }	    
-	  if (isnan(dndeee)) {dndeee=0.;}
+	  if (::isnan(dndeee)) {dndeee=0.;}
 	  
 	  _quenchedtot[eee] += dndeee;
 
@@ -1360,7 +1360,7 @@ int main(int argc, char * argv[] )
 	  
 	    dndqcinterp = dndqcinbin/qcperMeVee;
 	    
-	    if (isnan(dndqcinterp)) {dndqcinterp=0.;}
+	    if (::isnan(dndqcinterp)) {dndqcinterp=0.;}
 	  
 	  //	if (qc>0) {
 	    totinqc += dndqcinterp;	
