@@ -1,2 +1,6 @@
+*.pdf
+*.out
 *.o
 *.a
+json*
+sns_rates
