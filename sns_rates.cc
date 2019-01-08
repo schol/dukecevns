@@ -19,7 +19,7 @@ using json = nlohmann::json;
 
 #include "xscns.h"
 
-void get_flavor_weight(int, double,double,double*, double*, double*);
+//void get_flavor_weight(int, double,double,double*, double*, double*);
 
 
 int main(int argc, char * argv[] )
@@ -68,14 +68,14 @@ int main(int argc, char * argv[] )
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
   //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
 
-  double tw1 = j["timewindow"]["start"];
-  double tw2 = j["timewindow"]["end"];
-  get_flavor_weight(convolved,tw1,tw2,&wnumu,&wnumubar,&wnue);
+  //double tw1 = j["timewindow"]["start"];
+  //double tw2 = j["timewindow"]["end"];
+  //get_flavor_weight(convolved,tw1,tw2,&wnumu,&wnumubar,&wnue);
 
   //  wnumu*=1.037;
   //wnumubar*=1.037;
 
-  std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
+  //std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
 
 
@@ -234,7 +234,7 @@ int main(int argc, char * argv[] )
 
   // First get the total mass.  Get also the maximum recoil values
 
-  double erecmaxvals[max_components];
+  //double erecmaxvals[max_components];
   double Mtot = 0;
   v = isotope_component.begin();
 
@@ -255,7 +255,7 @@ int main(int argc, char * argv[] )
     M = (Z+Nn)*amu - Z*me + Delta;
     if (M<minM) {minM=M;}
     Mtot += M*fraction[is];
-    erecmaxvals[is] = 2*kmax*kmax/(M+2*kmax);
+    //erecmaxvals[is] = 2*kmax*kmax/(M+2*kmax);
 
 
     // Set up the form factor for this isotope
