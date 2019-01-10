@@ -19,12 +19,12 @@
    can->Print("plots.pdf[");
 
    // draw plots
-   const int n = files.GetSize();
-   TGraph *gr[n] = {0};
+   const int n = files->GetSize();
+   TGraph *gr[100] = {0};
    TSystemFile *file;
    TIter next(files);
    int i=0;
-   while(file = (TSystemFile*) next()) {
+   while((file = (TSystemFile*) next())) {
       if (file->IsDirectory()) continue;
       TString name = file->GetName();
       if (!name.EndsWith(".out")) continue;
@@ -36,8 +36,8 @@
          continue;
       }
       gr[i]->Draw("al");
-      gr[i]->GetYaxis()->SetTitle("Event rate [/eV]");
-      gr[i]->GetXaxis()->SetTitle("Energy [keV]");
+      gr[i]->GetYaxis()->SetTitle("Event rate [/MeV]");
+      gr[i]->GetXaxis()->SetTitle("Energy [MeV]");
       can->Print("plots.pdf");
       i++;
    }

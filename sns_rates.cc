@@ -234,7 +234,7 @@ int main(int argc, char * argv[] )
 
   // First get the total mass.  Get also the maximum recoil values
 
-  double erecmaxvals[max_components];
+  //double erecmaxvals[max_components];
   double Mtot = 0;
   v = isotope_component.begin();
 
@@ -255,7 +255,7 @@ int main(int argc, char * argv[] )
     M = (Z+Nn)*amu - Z*me + Delta;
     if (M<minM) {minM=M;}
     Mtot += M*fraction[is];
-    erecmaxvals[is] = 2*kmax*kmax/(M+2*kmax);
+    //erecmaxvals[is] = 2*kmax*kmax/(M+2*kmax);
 
 
     // Set up the form factor for this isotope
