@@ -99,9 +99,9 @@ lar_sns.o:
 	$(CXX) -o lar_sns.o $(ROOTCFLAGS) $(CXXFLAGS) -c lar_sns.cc
 
 
-sns_rates: sns_rates.o $(libdiffspec) 
+sns_rates: sns_rates.o get_flavor_weight.o $(libdiffspec) 
 	$(RM) $@
-	$(CXX) -o $@ $(CXXFLAGS) get_flavor_weight.o -L. $^ $(ROOTLIBS) 
+	$(CXX) $(CXXFLAGS) -L. $^ $(ROOTLIBS) -o $@
 
 
 .PHONY: sns_rates.o
