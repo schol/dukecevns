@@ -84,7 +84,7 @@ int main(int argc, char * argv[] )
   std::string ffname = j["formfactor"]["type"];
 
   // Array of pointers to form factors, for protons and neutrons separately, axial and vector separately
-  // (although small differences
+  // (although small differences)
 
   FormFactor** ffpv;
   ffpv = new FormFactor*[max_components];
@@ -415,8 +415,9 @@ int main(int argc, char * argv[] )
     // Overall norm factor
 
   double detector_mass = j["mass"]; // tons
-  double hoursperyear =j["flux"]["hoursperyear"];
-  double exposure = 3600.*hoursperyear;
+
+  double hours =j["flux"]["hours"];
+  double exposure = 3600.*hours;
   
   double norm_factor = detector_mass*exposure;
 
@@ -1127,6 +1128,9 @@ int main(int argc, char * argv[] )
 	v++;is++;
       }
 
+      // Retrieve the smearing function, which should have Gaussian sigma as a function of Eee
+      std::string gsname = j["detectorresponse"]["gsname"];
+
       // Now interpolated rates for quenched, summed over components
 
       std::ofstream qoutfile;
@@ -1188,13 +1192,30 @@ int main(int argc, char * argv[] )
 
 	} // End of loop over components
 
-	
 
+	  // Apply the Eee efficiency here, if requested and not smeared
+	double eee_eff_factor = 0.;
+	if (gsname == "none"  && eff_type == "eee"){
+	  
+	  if (eee>=eethresh &&
+              (eeupperthresh > eethresh ? eee <= eeupperthresh : true)) {
+	    if (effname != "none") {
+	      eee_eff_factor = detresp->efficnum(eee);
+	    } else {
+	      eee_eff_factor = 1;
+	    }
+	  }
+
+	} else {
+	  eee_eff_factor = 1;
+	}
+	  
+	
       // Now output the total quenched output, per MeVee
-	qoutfile <<eee<<" "<<_quenchedtot[eee]<<std::endl;
+	qoutfile <<eee<<" "<<_quenchedtot[eee]*eee_eff_factor<<std::endl;
 	std::cout.unsetf(ios::fixed | ios::scientific);
 
-	nquenchedtot += _quenchedtot[eee]*eeestep;
+	nquenchedtot += _quenchedtot[eee]*eee_eff_factor*eeestep;
 
 
 
@@ -1216,8 +1237,6 @@ int main(int argc, char * argv[] )
 
     // Now do Gaussian smearing, if requested.  Quenching must be requested also if this is to be invoked.  Apply also efficiency here
 
-      // First retrieve the smearing function, which should have Gaussian sigma as a function of Eee
-      std::string gsname = j["detectorresponse"]["gsname"];
 
       if (gsname != "none") {
 	
