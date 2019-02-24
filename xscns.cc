@@ -18,6 +18,18 @@ double diffxscnvec(double knu, double mass, double erec) {
 
 }
 
+// Need cm^2
+
+double diffangdist(double knu,  double cth) {
+
+  // Only higher order terms kinematically
+  double diffxscn = A2forcm2*knu*knu*(1+cth);
+        //      std::cout << erec<<" "<<q<<" "<<F<<" "<<std::endl;
+  return diffxscn;
+
+}
+
+
 
 double diffxscnaxial(double knu, double mass, double erec) {
   
