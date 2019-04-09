@@ -1,12 +1,27 @@
 # dukecevns
 Simple code for sharing within Duke group for CEvNS rate checks
 
-# Compilation
-For sns_rates.cc:  need json installed,  https://github.com/nlohmann/json.git. Simply run
+# Pre-requisition
 
+- https://github.com/nlohmann/json.git
+- https://code.ornl.gov/COHERENT/COHERENTProposal2018/tree/master/assumptions (private)
+
+Install json:
 ```sh
 cd /path/to/dukecevns
 git clone https://github.com/nlohmann/json.git
+```
+
+Grab the following files from ORNL GitLab and put them in `/path/to/dukecevns`:
+
+- `get_flavor_weight.cc`
+- `sns_out_BERT_convolved.root` and `sns_out_BERT.root`
+- everything in `qf/` and `jsonfiles/`
+
+# Compilation
+
+```sh
+cd /path/to/dukecevns
 make sns_rates
 ```
 
@@ -14,7 +29,7 @@ make sns_rates
 
 ```sh
 cd /path/to/dukecevns
-./sns_rates file-in-folder-named-jsonfiles-without-path-without-dot-json
+./sns_rates base-name-of-a-file-in-the-folder-named-jsonfiles
 ```
 
 Example `json` files can be found in ORNL GitLab repository `COHERENTProposal2018/assumptions/jsonfiles`.
