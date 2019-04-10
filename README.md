@@ -74,3 +74,15 @@ Kate recommends using the convolved flux histogram. The convolved flux histogram
 Column one: energy, # of PEs, or Qc, etc.
 Column two: efficiency
 
+### qf file format
+
+Row one: energy range
+Row two: quenching factor
+
+If `qftype==poly`, the second row contains polynomial coefficients: C0, C1, C2, etc. so that QF = C0 + C1*E + C2*E^2.
+
+# Output
+
+## sns_diff_rates_quenched-alliso-*.out
+Column one: Energy [MeVee]
+Column two: Number of events per MeVee
