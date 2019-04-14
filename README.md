@@ -6,13 +6,21 @@ Simple code for sharing within Duke group for CEvNS rate checks
 - https://github.com/nlohmann/json.git
 - https://code.ornl.gov/COHERENT/COHERENTProposal2018/tree/master/assumptions (private)
 
-Install json:
+One can run the included `bootstrap.sh` to grap the required packages automatically:
+
+```sh
+./bootstrap.sh
+```
+
+One can also do it manually:
+
+First, install json:
 ```sh
 cd /path/to/dukecevns
 git clone https://github.com/nlohmann/json.git
 ```
 
-Grab the following files from ORNL GitLab and put them in `/path/to/dukecevns`:
+Secondly, grab the following files from ORNL GitLab and put them in `/path/to/dukecevns`:
 
 - `get_flavor_weight.cc`
 - `sns_out_BERT_convolved.root` and `sns_out_BERT.root`
@@ -24,6 +32,8 @@ Grab the following files from ORNL GitLab and put them in `/path/to/dukecevns`:
 cd /path/to/dukecevns
 make sns_rates
 ```
+
+This is done automatically if one uses `bootstrap.sh`.
 
 # Usage
 
@@ -68,6 +78,8 @@ Kate recommends using the convolved flux histogram. The convolved flux histogram
 ### gs file format
 
 `polysqrt` means that it's a polynomial in terms of the square root of energy. The second line defines the range, and the third line includes the coefficients of the formula defined here: https://coherent.phy.duke.edu/wiki/Assumptions#NaI_Smearing (private).
+
+If `efftype = "qc"`, `qcgsname` or `qcsmearing` should be used. If `efftype="eee"`, `gsname` should be used. They cannot be mixed.
 
 ### efficiency file format
 
