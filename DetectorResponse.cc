@@ -504,21 +504,22 @@ void DetectorResponse::SetPoissonSmearingMatrix() {
       // Get the Poisson prob for pei given mean pej
 
       double poissprob;
-      double lnfact = 0.;
-      for (int j=0;j<=int(pei)-1;j++)
-	{
-	  lnfact += log(float(int(pei)-j));
-	}
+      if (pej==0) {
+         poissprob=0;
+      } else if (pej>500) { // gaussian approximation of poisson
+         poissprob = exp(-pow((pei-pej)/pej, 2.0)/2)/(pej*sqrt(2*M_PI));
+      } else {
+         double lnfact = 0.;
+         for (int j=0;j<=int(pei)-1;j++) lnfact += log(float(int(pei)-j));
 
-      double temp1 = int(pei)*log(pej)-lnfact;
-      double temp2 = exp(temp1);
-      poissprob = temp2*exp(-1.*pej);
-
-      //     std::cout << pej<<" "<<pei<<" "<<poissprob<<std::endl;
+         double temp1 = int(pei)*log(pej)-lnfact;
+         double temp2 = exp(temp1);
+         poissprob = temp2*exp(-1.*pej);
+      }
+      if (isnan(poissprob)) std::cout << pej<<" "<<pei<<" "<<poissprob<<std::endl;
 
       SmearingMatrix[ipe][jpe] = poissprob;
       pej += pestep;
-      
     }
 
     if (isnan(SmearingMatrix[ipe][jpe]) ) {SmearingMatrix[ipe][jpe] = 0.;}
