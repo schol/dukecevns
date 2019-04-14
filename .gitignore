@@ -6,9 +6,6 @@
 json*
 sns_rates
 get_flavor_weight.cc
-qf/csi*
-qf/ge*
-qf/lar*
-qf/nai*
+qf/*
 eff/*
 gs/*
