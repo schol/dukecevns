@@ -65,6 +65,12 @@ int main(int argc, char * argv[] )
   }
   std::cout << "Convolved "<<convolved<<std::endl;
 
+  int perpot = 0;
+  
+ if (j.find("perpot") != j.end()) {
+      perpot = j["perpot"];
+  }
+  
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
   //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
 
@@ -83,6 +89,10 @@ int main(int argc, char * argv[] )
 
   std::string ffname = j["formfactor"]["type"];
 
+  int noff = 0.;
+  if (ffname == "unity") {
+    noff = 1.; 
+  }
   // Array of pointers to form factors, for protons and neutrons separately, axial and vector separately
   // (although small differences)
 
@@ -121,7 +131,6 @@ int main(int argc, char * argv[] )
   std::cout << "Nus per sec per flavor "<<nuspersecperflavor<<" "<<dist<<std::endl;
   snsflux->SetNorm(nuspersecperflavor/(4*M_PI*dist*dist));
   // Gives flux per pidk per energy bin per second, energy bin in MeV,  normalize for 5e14 decays/s 
-
 
   // Set up oscillations
 
@@ -377,16 +386,19 @@ int main(int argc, char * argv[] )
     }
 
     A = Nn + Z;
-    ffnv[is]->SetA(A);
-    ffna[is]->SetA(A);
-    ffpv[is]->SetA(A);
-    ffpa[is]->SetA(A);
+    if (noff == 0) {
+      ffnv[is]->SetA(A);
+      ffna[is]->SetA(A);
+      ffpv[is]->SetA(A);
+      ffpa[is]->SetA(A);
+      
+      ffnv[is]->SetZ(Z);
+      ffna[is]->SetZ(Z);
+      ffpv[is]->SetZ(Z);
+      ffpa[is]->SetZ(Z);
 
-    ffnv[is]->SetZ(Z);
-    ffna[is]->SetZ(Z);
-    ffpv[is]->SetZ(Z);
-    ffpa[is]->SetZ(Z);
- 
+    }
+      
   // Set up detector quenching factors for each component
 
     
@@ -418,8 +430,16 @@ int main(int argc, char * argv[] )
 
   double hours =j["flux"]["hours"];
   double exposure = 3600.*hours;
-  
+
   double norm_factor = detector_mass*exposure;
+
+  if (perpot == 1) {
+    double pot = protonspersec*exposure;
+    norm_factor/= pot;
+    std::cout << "Protons on target: "<<pot<<" ; output per pot "<<std::endl;
+  }
+  
+
 
   // Use the mass of the lightest component
   double erecmaxall = 2*kmax*kmax/(minM+2*kmax);
@@ -564,11 +584,22 @@ int main(int argc, char * argv[] )
 
 	 double qq = Q/hbarc;
 	 //    double ff2 = helmff->FFval(qq);
-	 double ffnvval = ffnv[is]->FFval(qq);
-	 double ffnaval = ffna[is]->FFval(qq);
-	 double ffpvval = ffpv[is]->FFval(qq);
-	 double ffpaval = ffpa[is]->FFval(qq);
- 
+	 double ffnvval;
+	 double ffnaval;
+	 double ffpvval;
+	 double ffpaval;
+	 if (noff == 0) {
+	   ffnvval = ffnv[is]->FFval(qq);
+	   ffnaval = ffna[is]->FFval(qq);
+	   ffpvval = ffpv[is]->FFval(qq);
+	   ffpaval = ffpa[is]->FFval(qq);
+	 } else {
+	   ffnvval = 1.;
+	   ffnaval = 1.;
+	   ffpvval = 1.;
+	   ffpaval = 1.;
+	 }
+	   
 	 //	 double ff2 = pow(ff[is]->FFval(qq),2);
 	 //std::cout << "knumin, Erec, Q, ff2 "<<knumin<<" "<<Erec<<" "<<Q<<" "<<ff2<<" "<<M<<" "<<mass_fraction[is]<<std::endl;
 	    
@@ -589,7 +620,7 @@ int main(int argc, char * argv[] )
 	 double GV_sm_wff = Z*gv[0]*ffpvval+Nn*gv[1]*ffnvval;
 	 double GA_sm_wff = Zdiff*ga[0]*ffpaval+Ndiff*ga[1]*ffnaval;
 	 double GA_sm_bar_wff = Zdiff*gabar[0]*ffpaval+Ndiff*gabar[1]*ffnaval;
- 
+
 
 	 // Charge radius correction
 	 double mufact=1.;
