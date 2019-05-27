@@ -72,11 +72,24 @@ double Klein::FFval(double Q)
  
   double ff = 1;
 
+  // Gutlein... probably wrong
   // double R2 = 1.14*pow(A,1./3.);
 
-     double R2 = 1.2*pow(A,1./3.)+skinfac*1.01*(double(A)-2.*Z)/double(A);
+  // Incorrect way to add skin
+  //double R2 = 1.2*pow(A,1./3.)+skinfac*1.01*(double(A)-2.*Z)/double(A);
 
-  // This scales the radius by Rfac
+  // Adding a skin
+  double skindelta = skinfac*1.01*(double(A)-2.*Z)/double(A);
+  double R2 = 1.2*pow(A,1./3.);
+  if (skindelta != 0) {
+    
+    R2 = sqrt(R2*R2+ 2*sqrt(15)/3*sqrt(R2*R2+10*akval*akval)*skindelta + 5*skindelta*skindelta/3);
+  }
+
+  //double Ravg = sqrt(3*R2*R2/5+6*akval*akval);
+  //  std::cout << "A, Z, R2, skindelta, Ravg: "<<A<<" "<<Z<<" "<<R2<<" "<<skindelta<<" "<<Ravg<<std::endl;
+  
+      // This scales the radius by Rfac
   Q *= Rfac;
 
   double qR = Q*R2;
