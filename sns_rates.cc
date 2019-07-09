@@ -70,7 +70,16 @@ int main(int argc, char * argv[] )
  if (j.find("perpot") != j.end()) {
       perpot = j["perpot"];
   }
-  
+
+ // A generic normalization factor for the recoil spectrum
+  double usernorm = 1.;
+
+  if (j.find("usernorm") != j.end()) {
+    usernorm = j["usernorm"];
+    std::cout << "User normalization: "<<usernorm<<std::endl;
+  }
+
+ 
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
   //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
 
@@ -78,13 +87,14 @@ int main(int argc, char * argv[] )
   double tw2 = j["timewindow"]["end"];
   get_flavor_weight(convolved,tw1,tw2,&wnumu,&wnumubar,&wnue);
 
-  //  wnumu*=1.037;
-  //wnumubar*=1.037;
 
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
-
-
+  // Zenodo for first microsecond
+  // wnue=0.120603;
+  // wnumubar = 0.120603;
+  // wnumu =  0.974297;
+   
   // Set up the form factor
 
   std::string ffname = j["formfactor"]["type"];
@@ -431,7 +441,7 @@ int main(int argc, char * argv[] )
   double hours =j["flux"]["hours"];
   double exposure = 3600.*hours;
 
-  double norm_factor = detector_mass*exposure;
+  double norm_factor = detector_mass*exposure*usernorm;
 
   if (perpot == 1) {
     double pot = protonspersec*exposure;
@@ -1484,6 +1494,9 @@ int main(int argc, char * argv[] )
 	    }
 	  
 	    qcoutfile << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
+
+	    //	    std::cout << iqc <<" "<<_smearedqcmap[qc]<<" "<<_smearedqcmap[qc]*qc_eff_factor<<" "<<_qcmapall[qc]<<" qc "<<qc<<" eff "<<qc_eff_factor<<" "<<_qcmapall[qc]*qc_eff_factor<<std::endl;
+
 	    // It's events per qc bin
 	    totev += _smearedqcmap[qc]*qc_eff_factor;
 	    totevunsmeared += _qcmapall[qc]*qc_eff_factor;
