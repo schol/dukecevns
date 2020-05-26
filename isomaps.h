@@ -23,6 +23,10 @@
 
   Zs["Na23"]= 11;
 
+  Zs["Si28"]= 14;
+  Zs["Si29"]= 14;
+  Zs["Si30"]= 14;
+
   Zs["S32"] = 16;
   Zs["S33"] = 16;
   Zs["S34"] = 16;
@@ -68,6 +72,10 @@
   Ns["Ne22"]= 12;
 
   Ns["Na23"]= 12;
+
+  Ns["Si28"]= 14;
+  Ns["Si29"]= 15;
+  Ns["Si30"]= 16;
 
   Ns["S32"] = 16;
   Ns["S33"] = 17;
@@ -115,6 +123,11 @@
   Deltas["Ne22"]= -8.024;
 
   Deltas["Na23"]= -9.530;
+
+
+  Deltas["Si28"]= -21.43;
+  Deltas["Si29"]= -21.895;
+  Deltas["Si30"]= -24.432;
 
   Deltas["S32"] = -26.0155;
   Deltas["S33"] = -26.5858;
@@ -164,6 +177,10 @@
 
   Zdiffs["Na23"]= 1;
 
+  Zdiffs["Si28"]= 0;
+  Zdiffs["Si29"]= 0;
+  Zdiffs["Si30"]= 0;
+
   Zdiffs["S32"] = 0;
   Zdiffs["S33"] = 0;
   Zdiffs["S34"] = 0;
@@ -209,6 +226,10 @@
   Ndiffs["Ne22"]= 0;
 
   Ndiffs["Na23"]= 0;
+
+  Ndiffs["Si28"]= 0;
+  Ndiffs["Si29"]= 1;
+  Ndiffs["Si30"]= 0;
 
   Ndiffs["S32"] = 0;
   Ndiffs["S33"] = 1;

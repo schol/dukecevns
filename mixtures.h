@@ -50,6 +50,13 @@ double mass_fraction[max_components];
   isotopes["Ne20"].push_back("Ne20");
   molar_fraction["Ne20"].push_back(1.0);
 
+  isotopes["Si"].push_back("Si28");
+  molar_fraction["Si"].push_back(0.92223);
+  isotopes["Si"].push_back("Si29");
+  molar_fraction["Si"].push_back(0.04685);
+  isotopes["Si"].push_back("Si30");
+  molar_fraction["Si"].push_back(0.0392);
+
 
   isotopes["CsI"].push_back("Cs133");
   isotopes["CsI"].push_back("I127");
@@ -62,6 +69,7 @@ double mass_fraction[max_components];
 
   isotopes["I127"].push_back("I127");
   molar_fraction["I127"].push_back(1.0);
+
 
 
 ////
