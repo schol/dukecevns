@@ -6,6 +6,7 @@
 #include <fstream>
 #include <math.h>
 #include <string>
+#include "QuenchingFactorModel.h"
 
 // Energies in MeV
 class DetectorResponse
@@ -18,6 +19,9 @@ class DetectorResponse
   // For QF in numerical format
   std::map<double,double> _qfmap;
   char qffilename[80];
+
+  //QFmodel object
+  QuenchingFactorModel* QFModel;
 
   // For QF in polynomial format
   char qfpolyfilename[80];
@@ -56,10 +60,16 @@ class DetectorResponse
   char efficfilename[80];
 
 
- public: 
+ public:
   DetectorResponse();
   DetectorResponse(const char *);
-  ~DetectorResponse(){};
+  ~DetectorResponse(){
+    delete QFModel;
+  };
+//QF model functions
+  void InitialzeQFModel(const std::string& qftype, const std::string& qfname, const std::string& isoname);
+  double getqf(double erec);
+  double getqfderiv(double erec);
 
   void SetDetectorType(const char *);
   const char * GetDetectorType();
