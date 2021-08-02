@@ -76,6 +76,30 @@ class Reactor: public NuFlux {
 
 };
 
+
+class Monochromatic: public NuFlux {
+
+ protected:
+
+  int monoflavor = 1;
+  int monoenergy = 30.;
+
+ public:
+
+ Monochromatic() : NuFlux("monochromatic") {}
+ double fluxval(double, int, double);
+ double maxEnu();
+
+ void SetFlavor(int);
+ int GetFlavor();
+
+ void SetEnergy(double);
+ double GetEnergy();
+
+};
+  
+  
+
 class NumericalFlux: public NuFlux {
 
   // Read generic flux from a file
