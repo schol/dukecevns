@@ -267,6 +267,7 @@ void DetectorResponse::ReadGSPolyFile() {
   std::ifstream gspolyfile;
   std::string filename = gspolyfilename;
   gspolyfile.open(filename.c_str());
+
   if (!gspolyfile) {
     std::cout << "File "<<filename<<" does not exist!" <<std::endl;
     exit(-1);
@@ -445,8 +446,6 @@ void DetectorResponse::SetGaussSmearingMatrix() {
 	std::cout << "Unknown smearing type; please set gstype "<<std::endl;
 	exit(1);
       }
-
-      //      std::cout << "sigma "<<eni<<" "<<enj<<" "<<sigma <<std::endl;
 
       SmearingMatrix[ien][jen] = exp(-pow(eni-enj,2)/(2*pow(sigma,2)))/(sqrt(2*M_PI)*sigma);
 
