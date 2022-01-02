@@ -19,7 +19,7 @@ using json = nlohmann::json;
 
 #include "xscns.h"
 
-void get_flavor_weight(int, double,double,double*, double*, double*);
+void get_flavor_weight(int, double,double,double*,double*, double*, double*);
 
 
 int main(int argc, char * argv[] )
@@ -81,12 +81,23 @@ int main(int argc, char * argv[] )
 
  
   // Don't use flavor weights if using snsflux numerical flux; it that should take care of the weighting
-  //    get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
+  //get_flavor_weight(1400.,7400.,&wnumu,&wnumubar,&wnue);
 
   double tw1 = j["timewindow"]["start"];
   double tw2 = j["timewindow"]["end"];
-  get_flavor_weight(convolved,tw1,tw2,&wnumu,&wnumubar,&wnue);
+  
+  
+  if (convolved>0) {
+    double teffic_params[3]={0,0,0};
 
+    if (j.find("teffic") != j.end()) {
+      teffic_params[0] = j["teffic"]["offset"];
+      teffic_params[1] = j["teffic"]["a"];
+      teffic_params[2] = j["teffic"]["b"];
+    }
+
+    get_flavor_weight(convolved,tw1,tw2,teffic_params,&wnumu,&wnumubar,&wnue);
+  }
 
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
@@ -138,10 +149,12 @@ int main(int argc, char * argv[] )
   double nusperprotonperflavor = j["flux"]["nusperprotonperflavor"];
   double nuspersecperflavor = nusperprotonperflavor*protonspersec;
   double dist = j["distance"];
-  std::cout << "Nus per sec per flavor "<<nuspersecperflavor<<" "<<dist<<std::endl;
+  std::cout << "Nus per sec per flavor "<<nuspersecperflavor<<" "<<dist<<" flux "<<nuspersecperflavor/(4*M_PI*dist*dist)<<std::endl;
   snsflux->SetNorm(nuspersecperflavor/(4*M_PI*dist*dist));
   // Gives flux per pidk per energy bin per second, energy bin in MeV,  normalize for 5e14 decays/s 
 
+
+  
   // Set up oscillations
 
 
@@ -247,6 +260,7 @@ int main(int argc, char * argv[] )
   std::string qftype = j["detectorresponse"]["qftype"];
   std::string qfname = j["detectorresponse"]["qfname"];
 
+  double Ntargets = 0; // Total targets
   int is=0;
   std::vector<std::string>::iterator v = isotope_component.begin();
   std::string isotope;
@@ -478,6 +492,12 @@ int main(int argc, char * argv[] )
    // The totals
    double toterecoil = 0.;
    double totevents = 0.;
+   double toteventsnue = 0.;
+   double toteventsnuebar = 0.;
+   double toteventsnumu = 0.;
+   double toteventsnumubar = 0.;
+   double toteventsnutau= 0.;
+   double toteventsnutaubar = 0.;
 
 
    int iq=0;
@@ -581,7 +601,7 @@ int main(int argc, char * argv[] )
 	 mass_fraction[is] = M/Mtot*fraction[is];
 	    
 	 A = Nn + Z;
-	 //	  std::cout << " Z "<<Z<<" N "<<Nn<<" A "<<A<<" M "<<M << " "<<mass_fraction[is]<<std::endl;
+	 //	 std::cout << " Z "<<Z<<" N "<<Nn<<" A "<<A<<" M "<<M << " "<<mass_fraction[is]<<std::endl;
 
 	 // Loop over neutrino energy contributions
 	  
@@ -621,10 +641,19 @@ int main(int argc, char * argv[] )
 	   
 	 double gv[2], ga[2], gabar[2];
 	 int pdgyr = j["couplings"]["pdgyear"];
-	 sm_vector_couplings(pdgyr,gv);
-	 sm_axial_couplings(pdgyr,1,ga);
-	 sm_axial_couplings(pdgyr,-1,gabar);
-
+	 if (pdgyr==0) {
+	   // Custom couplings, must be present in json file
+	   gv[0] = j["couplings"]["gvp"];
+	   gv[1] = j["couplings"]["gvn"];
+	   ga[0] = j["couplings"]["gap"];
+	   ga[1] = j["couplings"]["gan"];
+	   gabar[0] = ga[0]*-1;
+	   gabar[1] = ga[1]*-1;
+	 } else {
+	   sm_vector_couplings(pdgyr,gv);
+	   sm_axial_couplings(pdgyr,1,ga);
+	   sm_axial_couplings(pdgyr,-1,gabar);
+	 }
 
 	 // Bundle the form factor contributions with the SM couplings, separately for p and n
 	 double GV_sm_wff = Z*gv[0]*ffpvval+Nn*gv[1]*ffnvval;
@@ -653,29 +682,40 @@ int main(int argc, char * argv[] )
 	double chgradcorr_tau = 0.;
 	double chgradcorr_taubar = 0.;
 
+	int chgcorrtype=0;
+	
 	if  (j["couplings"]["chargeradiusfactor"] == "erler") {
-
-	  chgradcorr_e = chgradcorr(1,1);
-	  chgradcorr_ebar = chgradcorr(-1,1);
-	  chgradcorr_mu = chgradcorr(2,1);
-	  chgradcorr_mubar = chgradcorr(-2,1);
-	  chgradcorr_tau = chgradcorr(3,1);
-	  chgradcorr_taubar = chgradcorr(-3,1);
-
+	  chgcorrtype=1;
 	}
-
 	
 	if  (j["couplings"]["chargeradiusfactor"] == "giunti") {
-
-	  chgradcorr_e = chgradcorr(1,2);
-	  chgradcorr_ebar = chgradcorr(-1,2);
-	  chgradcorr_mu = chgradcorr(2,2);
-	  chgradcorr_mubar = chgradcorr(-2,2);
-	  chgradcorr_tau = chgradcorr(3,2);
-	  chgradcorr_taubar = chgradcorr(-3,2);
-
+	  // Corrected
+	  chgcorrtype = 2;
 	}
 
+       	if  (j["couplings"]["chargeradiusfactor"] == "giuntiold") {
+	  // legacy
+	  chgcorrtype = 3;
+	}
+
+	if (chgcorrtype>0 && chgcorrtype<=3) {
+	  chgradcorr_e = chgradcorr(1,chgcorrtype);
+	  chgradcorr_ebar = chgradcorr(-1,chgcorrtype);
+	  chgradcorr_mu = chgradcorr(2,chgcorrtype);
+	  chgradcorr_mubar = chgradcorr(-2,chgcorrtype);
+	  chgradcorr_tau = chgradcorr(3,chgcorrtype);
+	  chgradcorr_taubar = chgradcorr(-3,chgcorrtype);
+	}
+	if (j["couplings"]["chargeradiusfactor"] == "tomalak") {
+	  // These are Q dependent
+	  // Note these should come with custom couplings
+	  chgradcorr_e = chgradcorr_tomalak(Q,1);
+	  chgradcorr_ebar = chgradcorr_tomalak(Q,1);
+	  chgradcorr_mu = chgradcorr_tomalak(Q,2);
+	  chgradcorr_mubar = chgradcorr_tomalak(Q,2);
+	  chgradcorr_tau = chgradcorr_tomalak(Q,3);
+	  chgradcorr_taubar = chgradcorr_tomalak(Q,3);
+	}
 
 	GV_sm_wff_e= Z*(gv[0]+chgradcorr_e)*ffpvval+Nn*gv[1]*ffnvval;
 	GV_sm_wff_ebar= Z*(gv[0]+chgradcorr_ebar)*ffpvval+Nn*gv[1]*ffnvval;
@@ -806,11 +846,13 @@ int main(int argc, char * argv[] )
 	  
 	}
 
-	 // Normalize for one ton of material
+	 // Targets for one ton of material
 	 // Will be weighted by mass fraction
 	    
 	 double Nt = 1.e6/(M/amu)*6.0221409e23;
-	    
+
+
+	 //	 std::cout << "Number of targets "<<Nt<<std::endl;
 	 // A2: G^2/(2Pi) * hbarcinmeters^-4 
 	 double ntfac = Nt;
 	    
@@ -823,7 +865,7 @@ int main(int argc, char * argv[] )
 	 } else if (qftype == "numerical") {
 	  Eee[is][iq] = qffunc[is]->qfnum(Erec)*Erec;
 	  qfderiv = abs(qffunc[is]->qfnumderiv(Erec));
-	 }
+	 } 
 
 
 	 double drate_e_vec=0;
@@ -1043,6 +1085,13 @@ int main(int argc, char * argv[] )
 
         events += sum_diffrate_e_mag + sum_diffrate_ebar_mag + sum_diffrate_mu_mag+ sum_diffrate_mubar_mag+ sum_diffrate_tau_mag + sum_diffrate_taubar_mag;
 
+	toteventsnue+= erecstep*(sum_diffrate_e_vec+sum_diffrate_e_axial+sum_diffrate_e_interf+sum_diffrate_e_mag);
+
+	toteventsnumu+= erecstep*(sum_diffrate_mu_vec+sum_diffrate_mu_axial+sum_diffrate_mu_interf+sum_diffrate_mu_mag);
+
+	toteventsnumubar+= erecstep*(sum_diffrate_mubar_vec+sum_diffrate_mubar_axial+sum_diffrate_mubar_interf+sum_diffrate_mubar_mag);
+
+	
 	totevents+=events*erecstep;
 
 	toterecoil += events*Erec*erecstep;
@@ -1050,6 +1099,7 @@ int main(int argc, char * argv[] )
 	// Increment bin for quenching
 	
 	iq++;
+
 
   } // End of loop over Erec
 
@@ -1452,16 +1502,23 @@ int main(int argc, char * argv[] )
 	if (qcsmearing == "poisson") {
 	  qcsmear->SetPoissonSmearingMatrix();
 	  
-	} else {
-	  std::string qcgsname = j["detectorresponse"]["qcgsname"];
+	}  else if (qcsmearing == "gamma") {
+	    double gammasmearpars[2];
+	    gammasmearpars[0] = j["detectorresponse"]["aparam"];
+	    gammasmearpars[1] = j["detectorresponse"]["bparam"];
+	    qcsmear->SetGammaSmearPars(gammasmearpars);
+	    qcsmear->SetGammaSmearingMatrix();
+	}  else {
+	  
+	    std::string qcgsname = j["detectorresponse"]["qcgsname"];
 
-	  std::string qcsmearfilename;
-	  qcsmearfilename = "gs/"+std::string(qcgsname)+"_qcsmear.txt";
-	  qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
-	  qcsmear->ReadGSPolyFile();
-	  qcsmear->SetGaussSmearingMatrix();
+	    std::string qcsmearfilename;
+	    qcsmearfilename = "gs/"+std::string(qcgsname)+"_qcsmear.txt";
+	    qcsmear->SetGSPolyFilename(qcsmearfilename.c_str());
+	    qcsmear->ReadGSPolyFile();
+	    qcsmear->SetGaussSmearingMatrix();
 	}
-
+	
 
 	std::cout << "do qc smearing" <<std::endl;
 	// Do the smearing
@@ -1514,8 +1571,21 @@ int main(int argc, char * argv[] )
     }  // End of do-quenching case
 
 
+    // Total flux-averaged xscn
+
+    Ntargets = 1.e6/(Mtot/amu)*6.0221409e23*detector_mass;
+    double totalnus = nuspersecperflavor*(wnue+wnumu+wnumubar)/(4*M_PI*dist*dist)*exposure;
+    double totalnue = nuspersecperflavor*wnue/(4*M_PI*dist*dist)*exposure;
+    double totalnumu = nuspersecperflavor*wnumu/(4*M_PI*dist*dist)*exposure;
+    double totalnumubar = nuspersecperflavor*wnumubar/(4*M_PI*dist*dist)*exposure;
+
+
+    std::cout << "Total flux-averaged cross section: "<< totevents/Ntargets/totalnus*1e40<<" x 10-40 cm^2"<<std::endl;
+    std::cout << "Total flux-averaged cross section, nue: "<< toteventsnue/Ntargets/totalnue*1e40<<" x 10-40 cm^2"<<std::endl;
+    std::cout << "Total flux-averaged cross section, numu: "<< toteventsnumu/Ntargets/totalnumu*1e40<<" x 10-40 cm^2"<<std::endl;
+    std::cout << "Total flux-averaged cross section, numubar: "<< toteventsnumubar/Ntargets/totalnumubar*1e40<<" x 10-40 cm^2"<<std::endl;
+    std::cout << "Total flux-averaged cross section, numu+numubar: "<< (toteventsnumu+toteventsnumubar)/Ntargets/(totalnumu+totalnumubar)*1e40<<" x 10-40 cm^2"<<std::endl;
+
   return 0;
   
 }
-
-
