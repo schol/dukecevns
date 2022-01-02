@@ -363,6 +363,18 @@ void DetectorResponse::SetMaxEee(double maxeee) {
   maxEee = maxeee;
 }
 
+// For gamma function smearing
+void DetectorResponse::SetGammaSmearPars(double* pars) {
+
+  gammasmearpars[0] = pars[0];
+  gammasmearpars[1] = pars[1];
+
+}
+
+double* DetectorResponse::GetGammaSmearPars() { return gammasmearpars;}
+
+
+
 double DetectorResponse::GetMaxEee() {
   return maxEee;
 }
@@ -547,6 +559,78 @@ void DetectorResponse::SetPoissonSmearingMatrix() {
   } // End of normalizing
 
 }
+
+void DetectorResponse::SetGammaSmearingMatrix() {
+
+	// Do a binned normalization for each column, or else it's subject to binning effects and edge effects, and won't be unitary
+
+
+   SmearingMatrix = new double*[NSmearBin];
+   for(int i = 0; i < NSmearBin; ++i) {
+    SmearingMatrix[i] = new double[NSmearBin];
+   }
+
+  double pei=0.;
+  double pej=0.;
+  int ipe, jpe;
+
+  double pestep = maxSmearEn/NSmearBin; // to synch with Smear method 
+
+  for (ipe=0;ipe<NSmearBin;ipe++) {
+    
+    pej = 0.;
+
+    for (jpe=0;jpe<NSmearBin;jpe++) {
+
+      // Get the Poisson prob for pei given mean pej
+
+      double a=0,b=0;
+      if (pej>0) {
+	a = gammasmearpars[0]/pej;
+	b = gammasmearpars[1]*pej;
+      }
+      double gammaprob;
+      if (pej==0) {
+         gammaprob=0;
+      } else if (pej>500) { // gaussian approximation
+         gammaprob = exp(-pow((pei-pej)/pej, 2.0)/2)/(pej*sqrt(2*M_PI));
+      } else {
+
+	gammaprob = pow(a*(1+b),1+b)*pow(pei,b)*exp(-1.*a*(1+b)*pei)/tgamma(1+b);
+      }
+      if (isnan(gammaprob)) std::cout << pej<<" "<<pei<<" a "<<a<<" b "<<b<<" "<<tgamma(1+b)<<" "<<gammaprob<<" "<<pow(a*(1+b),1+b)<<" "<<pow(pei,b)<<std::endl;
+
+      SmearingMatrix[ipe][jpe] = gammaprob;
+      pej += pestep;
+    }
+
+    if (isnan(SmearingMatrix[ipe][jpe]) ) {SmearingMatrix[ipe][jpe] = 0.;}
+
+    pei += pestep;
+	    
+  } // End of loop over rows
+
+
+  // Now normalize over rows in a given column
+
+  for (jpe=0;jpe<NSmearBin;jpe++) {
+    
+    double totincolumn = 0.;
+    for (ipe=0;ipe<NSmearBin;ipe++) {
+      totincolumn += SmearingMatrix[ipe][jpe];
+    }
+
+    for (ipe=0;ipe<NSmearBin;ipe++) {
+      if (totincolumn>0) {
+	SmearingMatrix[ipe][jpe] /= totincolumn;
+      } else {
+	SmearingMatrix[ipe][jpe] = 0.;
+      }
+    }
+  } // End of normalizing
+
+}
+
 
 
 

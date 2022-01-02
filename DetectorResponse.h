@@ -31,6 +31,10 @@ class DetectorResponse
   double gspolyrange[2]; // Range of validity for polynomial
   char gstype[0];
 
+
+  // For gamma function smearing
+  double gammasmearpars[2];
+  
   int NEeeBin;
   double maxEee;
   double maxSmearEn;
@@ -97,6 +101,10 @@ class DetectorResponse
   double gspoly(double);
   double gspolysqrt(double);
 
+  void SetGammaSmearPars(double*);
+  double* GetGammaSmearPars();
+   
+  
   void SetNEeeBin(int);
   int GetNEeeBin();
 
@@ -118,6 +126,7 @@ class DetectorResponse
 
   void SetGaussSmearingMatrix();
   void SetPoissonSmearingMatrix();
+  void SetGammaSmearingMatrix();
 
   std::map<double,double> Smear(std::map<double,double>);
 
