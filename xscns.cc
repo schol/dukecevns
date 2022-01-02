@@ -1,10 +1,13 @@
 #include "xscns.h"
 #include <math.h>
+#include <iostream>
 
 // All energies in MeV
 
-double A2forcm2=8.43103e-45; // ((G^2)/(2  Pi)) *hbarcinmeters^-4*(100)^2
-double hbarcincm=197.327e-13;
+
+const double A2forcm2=8.43103e-45; // ((G^2)/(2  Pi)) *hbarcinmeters^-4*(100)^2
+const double hbarcincm=197.327e-13; // MeV-cm
+const double Anuelforcm2 = 1.7233e-44; // ((2 G^2 me )/(Pi)) *hbarcinmeters^-4*(100)^2
 
 /////////////////////////
 // Differential cross section in cm^2 MeV^-1  for combination with GV, GA
@@ -57,13 +60,138 @@ double diffxscnmag(double knu, double erec) {
 }
 
 
+///////////////
+
+// Neutrino-electron scattering cross section
+
+double diffnuelectronxscn(int flav,  double knu, double erec) {
+
+  // flav = 1: electron
+  // flav = 2: muon
+  // flav = 3: tau
+  // flav is negative for antineutrinos
+
+
+
+  double gV, gA;
+  const double ssthW = 0.231; 
+  
+  switch (flav) {
+  case 1:
+    gV = 2*ssthW+0.5;
+    gA = 0.5;
+    break;
+  case 2: 
+    gV = 2*ssthW-0.5;
+    gA = -0.5;
+    break;
+  case 3: 
+    gV = 2*ssthW-0.5;
+    gA = -0.5;
+    break;
+  case -1: 
+    gV = 2*ssthW+0.5;
+    gA = -0.5;
+    break;
+  case -2: 
+    gV = 2*ssthW-0.5;
+    gA = 0.5;
+    break;
+  case -3: 
+    gV = 2*ssthW-0.5;
+    gA = 0.5;
+    break;
+    std::cout<< "Wrong flavor "<<std::endl;
+  }
+
+  double me=0.51099895;
+
+  // std::cout << "no pol "<<Anuelforcm2/4.*(pow(gA+gV,2))<<" pow(gA+gV,2) "<<pow(gA+gV,2)<<" "<<std::endl;
+  return Anuelforcm2/4.*(pow(gA+gV,2)+ pow(gV-gA,2)*(1-erec/knu)*(1-erec/knu)+(gV*gV+gA*gA)*me*erec/(knu*knu));
+
+  
+}
+			  
+
+
+///////////////
+
+// Neutrino-electron scattering cross section for nonzero mass, from Barranco et al.
+
+double diffnuelectronxscn2(int flav,  double knu, double erec, double spar, double mnu, int maj) {
+
+  // flav = 1: electron
+  // flav = 2: muon
+  // flav = 3: tau
+  // flav is negative for antineutrinos
+
+  // spar is parallel component of spin, nominally -1 for zero mass
+
+  // maj = 1: Majorana
+  // maj = 0: Dirac
+
+  double gV, gA;
+  const double ssthW = 0.231; 
+  
+  switch (flav) {
+  case 1:
+    gV = 2*ssthW+0.5;
+    gA = 0.5;
+    break;
+  case 2: 
+    gV = 2*ssthW-0.5;
+    gA = -0.5;
+    break;
+  case 3: 
+    gV = 2*ssthW-0.5;
+    gA = -0.5;
+    break;
+  case -1: 
+    gV = 2*ssthW+0.5;
+    gA = -0.5;
+    break;
+  case -2: 
+    gV = 2*ssthW-0.5;
+    gA = 0.5;
+    break;
+  case -3: 
+    gV = 2*ssthW-0.5;
+    gA = 0.5;
+    break;
+    std::cout<< "Wrong flavor "<<std::endl;
+  }
+
+  double me=0.51099895;
+  double xscn=0.;
+  double pnu = pow(knu*knu-mnu*mnu, 0.5);
+  if (maj == 0) {
+    //   std::cout <<" pnu "<<pnu<< "pol "<<Anuelforcm2/8.*(pow(gA+gV,2)*knu*(knu-spar*pnu)/(pnu*pnu))<<" factor "<<
+    //knu*(knu-spar*pnu)/(pnu*pnu)<<" pow(gA+gV,2) "<<pow(gA+gV,2)<<std::endl;
+    xscn = Anuelforcm2/8.*(pow(gA+gV,2)*knu*(knu-spar*pnu)/(pnu*pnu)
+			   + (pow(gV-gA,2)*pow(knu-erec,2)/(pnu*pnu)+(gA*gA-gV*gV)*me*erec/(pnu*pnu))
+			   *(1-spar*knu/pnu)
+			   + (spar/pnu*pow(gA-gV,2)*(knu-erec)*(1+erec/me)+(gA*gA-gV*gV)*(1-spar*erec/pnu))
+			   * pow(mnu/pnu,2));
+  } else {
+    xscn = Anuelforcm2/(4.*pnu*pnu)*(2*(2*gA*gA-gV*gV)*mnu*mnu
+			     - 4*knu/pnu*gA*gV*spar*erec*(knu+mnu*mnu/me)*(1-erec/(2*knu))
+			     + (gA*gA-gV*gV)*me*erec
+			     + (gA*gA+gV*gV)*(2*knu*knu*(1-erec/knu)+erec*erec*(1+mnu*mnu/(me*erec))));
+      
+  }
+
+  return xscn;
+}
+			  
+
+
 ///////////////////////
 
 // SM parameters
 
 void sm_vector_couplings(int pdgyear, double* gv) {
 
-  // Default is 2015 PDG, from Erler and Su paper.  This is for mu flavor
+  // Default is 2015 PDG, from Erler and Su paper.  This is for mu flavor.  Erler and Su has charge radius correction for mu flavor, so remove it for default not correction.
 
   // This is subtracting the charge radius correction for the 
   // proton coupling; these are values in the table for mu flavor,
@@ -79,6 +207,12 @@ void sm_vector_couplings(int pdgyear, double* gv) {
   double gVp = 0.0227;
   double gVn= -0.5117;
 
+  if (pdgyear == 0) {
+    // Custom couplings
+    std::cout << "Custom couplings requested"<<std:: endl;
+    exit(0);
+  }
+  
   if (pdgyear < 2004){
     gVp = 0.0152;
     gVn = -0.5122;
@@ -100,8 +234,10 @@ void sm_vector_couplings(int pdgyear, double* gv) {
   }
 
   if (pdgyear >= 2014 && pdgyear < 2020){
-     gVp = 0.01836;
-     gVn= -0.5117;
+
+    // Erler and Su with Giunti charge correction removed for numu
+    gVp = 0.01836;
+    gVn= -0.5117;
   }
 
 //    if (pdgyear < 2015) {
@@ -147,30 +283,121 @@ double chgradcorr(int flavor, int type) {
       gvpcorr = 0.00706633;
     }
 
-  } else if (type == 2) {
+  } else if (type==2) {
+
+   // Updated Giunti but no sign change for antineutrinos, and slightly tweaked numbers according to the reference
+    
+    if (flavor == 1) {
+      gvpcorr = 0.0212196;
+    } else if (flavor == 2) {
+      gvpcorr = 0.0122716;
+    }
+    else if (flavor == 3) {
+      gvpcorr = 0.00766972;
+    }
+
+  }
+  else if (type == 3) {
 
     // Giunti corrections
 
     if (flavor == 1) {
-      //      gvpcorr = -0.0108251;
       gvpcorr = 0.02191;
     } else if (flavor == 2) {
-      //      gvpcorr = -0.00633633;
       gvpcorr = 0.01267;
     }
     else if (flavor == 3) {
-      //      gvpcorr = -0.00396039;
       gvpcorr = 0.00792;
     }
 
-    // Opposite sign for antineutrinos
+    // Opposite sign for antineutrinos-- note this is wrong (see Errata 2020 for Giunti) but included as legacy
+    gvpcorr *= sign;
 
-  }
-  gvpcorr *=sign;
+  } 
 
   return gvpcorr;
  
 }
+
+// For use in Tomalak charge radius correction
+double Pifunc(double Q, double mf, double mu) {
+
+  // Q: momentum transfer
+  // Mf: lefton mass 
+  // Mu: renormalization scale in GeV
+
+  double Q2 = Q*Q;
+  double mf2 = mf*mf;
+  double A = sqrt(1+ 4*mf2/Q2);
+
+  double Pival=0;
+  if (Q2!=0) {
+
+    Pival = (1/3.)*(2*log(mu)-log(mf2))
+    +5./9. - 4*mf2/(3*Q2) + (1/3.)*(1-2*mf2/Q2)*A*(log(A-1)-log(A+1));
+
+  } else {
+    // Limit for small Q
+    Pival = (1./3.)*(2*log(mu)-log(mf2))-Q2/(15.*mf2);
+
+  }
+
+
+  return Pival;
+
+}
+
+double chgradcorr_tomalak(double Q, int flav){
+
+  // return Q-dependent flavor correction to gVP
+  // Based on Tomalak et al., arXiv:2011.05960v2
+
+
+    //A = alpha/(2*M_PI)/(sqrt(2)*GF)
+
+  // Q-independent part
+  // qcdcorr= alpha*deltaQCD/(2.*M_PI)
+  
+  const double qcdcorr = -0.00498612;
+  const double A = 72.3779;
+  double deltaf = 0;
+  const double cLee = 2.41198e-05;
+  const double cLemu = -8.8704e-06;
+  const double cLmumu = cLee;
+  const double cLtautau = cLee;
+  const double cLetau = cLemu;
+  const double cLmue = cLemu;
+  const double cLmutau = cLemu;
+  const double cLtaue = cLemu;
+  const double cLtaumu = cLemu;
+  const double cRl = 7.62469e-06;
+
+  const double mu = 2000.;
+
+  const double me = 0.510998;
+  const double mmu = 105.6583755;
+  const double mtau = 1776.86;  
+  
+  double chgradcorr = qcdcorr;
+  if (abs(flav) ==1 ) {
+    deltaf=A*((cLee+cRl)*Pifunc(Q,me,mu)+ (cLemu+cRl)*Pifunc(Q,mmu,mu)+(cLetau+cRl)*Pifunc(0,mtau,mu));
+  } 
+
+  if (abs(flav) ==2 ) {
+    deltaf=A*((cLmue+cRl)*Pifunc(Q,me,mu)+ (cLmumu+cRl)*Pifunc(Q,mmu,mu)+(cLmutau+cRl)*Pifunc(0,mtau,mu));
+  }
+
+  if (abs(flav) ==3 ) {
+    deltaf=A* ((cLetau+cRl)*Pifunc(Q,me,mu)+ (cLtaumu+cRl)*Pifunc(0,mmu,mu)+(cLtautau+cRl)*Pifunc(Q,mtau,mu));
+  } 
+
+  chgradcorr += deltaf;
+  return chgradcorr;
+
+}
+
+
+
 
 void sm_axial_couplings(int pdgyear, int flav, double* ga) {
 
@@ -185,6 +412,12 @@ void sm_axial_couplings(int pdgyear, int flav, double* ga) {
 
   //  double sstw = 0.231;
 
+  if (pdgyear == 0) {
+    // Custom couplings
+    std::cout << "Custom couplings requested"<<std:: endl;
+    exit(0);
+  }
+  
   double gAp =  0.4995*flav/fabs(flav);
   double gAn = -0.5121*flav/fabs(flav);
 
@@ -221,7 +454,7 @@ void sm_axial_couplings(int pdgyear, int flav, double* ga) {
 
 
 
-// Note used
+// Not used
 double GV_SM(int pdgyear, int Z, int N) {
 
   // Default is 2015 PDG, from Erler paper
