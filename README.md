@@ -1,39 +1,61 @@
-# dukecevns
-Simple code for sharing within Duke group for CEvNS rate checks
+Simple code to calculate CEvNS rates in various experiments.
 
-# Pre-requisition
+# Pre-requisites
 
-- https://github.com/nlohmann/json.git
-- https://code.ornl.gov/COHERENT/COHERENTProposal2018/tree/master/assumptions (private)
+## JSON for Modern C++
 
-One can run the included `bootstrap.sh` to grap the required packages automatically:
+[JSON for Modern C++](https://github.com/nlohmann/json) is needed to read experiment configuration files in [JSON][] format. It has been added as a [git][] [submodule][] of [dukecevns][], and can be automatically fetched with the `--recurse-submodules` argument for `git clone`:
+
+```sh
+git clone --recurse-submodules https://github.com/schol/dukecevns
+```
+
+For an existing [dukecevns][] repository, the submodule can be fetched with the following commands:
+
+```sh
+cd /path/to/dukecevns
+rm -fr json
+git pull
+git submodule update --init
+```
+
+## CERN ROOT
+
+[ROOT][] is needed to compile [dukecevns][]. The [Makefile](Makefile) included in [dukecevns][] can be used to compile [dukecevns][] on Linux and MacOS with [ROOT][] installed. For Windows users, a [Docker][] image [physino/root][] that has the latest [ROOT][] installed in [Fedora][] Linux can be used to compile [dukecevns][]. If [Docker Desktop][] has been installed and is running, open a terminal in the folder of [dukecevns][] by highlighting the address bar of the file explorer and typing `cmd` and return. In the terminal, type
+
+```sh
+docker-compose run --rm sh
+```
+
+Wait and let [Docker][] do its magic until you see a familiar [SHELL][] [prompt][] showing up:
+
+```sh
+root@fedora:~/dukecevns $
+```
+
+Now you are in a [Docker][] container running [Fedora][] Linux with [ROOT][] pre-installed in it, where you can simply type `make` to compile [dukecevns][] as in a real Linux machine.
+
+## Optional dependencies
+
+Some calculations rely on additional code hosted in private git repositories, such as
+- <https://code.ornl.gov/COHERENT/COHERENTProposal2018>
+
+One can run the included `bootstrap.sh` to grab the required packages automatically:
 
 ```sh
 ./bootstrap.sh
 ```
 
-One can also do it manually:
-
-First, install json:
-```sh
-cd /path/to/dukecevns
-git clone https://github.com/nlohmann/json.git
-```
-
-Secondly, grab the following files from ORNL GitLab and put them in `/path/to/dukecevns`:
-
-- `get_flavor_weight.cc`
-- `sns_out_BERT_convolved.root` and `sns_out_BERT.root`
-- everything in `eff/`, `gs/`, `qf/` and `jsonfiles/`
-
 # Compilation
 
 ```sh
 cd /path/to/dukecevns
+# create libDiffSpec_1.0.a
+make
+# create an executable 'sns_rates' (needs private code)
+# done automatically if bootstrap.sh is used
 make sns_rates
 ```
-
-This is done automatically if one uses `bootstrap.sh`.
 
 # Usage
 
@@ -98,3 +120,15 @@ If `qftype==poly`, the second row contains polynomial coefficients: C0, C1, C2, 
 ## sns_diff_rates_quenched-alliso-*.out
 Column one: Energy [MeVee]
 Column two: Number of events per MeVee
+
+[JSON]: https://www.json.org/json-en.html
+[git]: https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F
+[submodule]: https://git-scm.com/book/en/v2/Git-Tools-Submodules
+[dukecevns]: https://github.com/schol/dukecevns
+[ROOT]: https://root.cern.ch
+[Docker]: https://www.docker.com
+[physino/root]: https://hub.docker.com/r/physino/root
+[Fedora]: https://en.wikipedia.org/wiki/Fedora_Linux
+[Docker Desktop]: https://www.docker.com/products/docker-desktop
+[SHELL]: https://en.wikipedia.org/wiki/Unix_shell
+[prompt]: https://en.wikibooks.org/wiki/Guide_to_Unix/Explanations/Shell_Prompt
