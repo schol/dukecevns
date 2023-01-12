@@ -31,7 +31,7 @@ targets = $(libdiffspec) formfactors diff_rates reactor_diff_rates nufluxes mapt
 
 $(libdiffspec) : $(OBJS)
 	$(RM) $@
-	ar clq $@ $(OBJS)
+	ar cq $@ $(OBJS)
 	ranlib $@
 	
 
