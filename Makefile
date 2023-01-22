@@ -2,7 +2,7 @@
 ROOTCFLAGS = `root-config --cflags`
 ROOTLIBS   = `root-config --libs`
 
-CXXFLAGS += -I. -I./json/include -Wall -std=c++11 
+CXXFLAGS += -I. -I./json/include -Wall
 
 
 %.o : %.c
