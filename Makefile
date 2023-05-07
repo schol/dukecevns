@@ -2,7 +2,7 @@
 ROOTCFLAGS = `root-config --cflags`
 ROOTLIBS   = `root-config --libs`
 
-CXXFLAGS += -I. -I./json/include -Wall -std=c++11 
+CXXFLAGS += -I. -I./json/include -Wall
 
 
 %.o : %.c
@@ -31,7 +31,7 @@ targets = $(libdiffspec) formfactors diff_rates reactor_diff_rates nufluxes mapt
 
 $(libdiffspec) : $(OBJS)
 	$(RM) $@
-	ar clq $@ $(OBJS)
+	ar cq $@ $(OBJS)
 	ranlib $@
 	
 

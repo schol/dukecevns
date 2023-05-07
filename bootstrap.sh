@@ -9,10 +9,7 @@ cd assumptions
 rsync -rtphv eff gs jsonfiles qf *.cc *.root ../../dukecevns
 
 cd ../../dukecevns
-if [ ! -d json ]; then
-  git clone https://github.com/nlohmann/json.git
-else
-  cd json; git pull; cd ..;
-fi
+# fetch json submodule if json/ is empty
+if [ ! "$(ls -A json)" ]; then git submodule update --init; fi
 
 make sns_rates
