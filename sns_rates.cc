@@ -50,9 +50,6 @@ int main(int argc, char * argv[] )
   // Info for relevant mixtures
 #include "mixtures.h"
 	
-
-  // Flavor weighting from file
-
   double wnumu=1.;
   double wnumubar=1.;
   double wnue=1.;
@@ -99,6 +96,19 @@ int main(int argc, char * argv[] )
     get_flavor_weight(convolved,tw1,tw2,teffic_params,&wnumu,&wnumubar,&wnue);
   }
 
+  // Flavor weighting from file if chosen. Do individually so as not to override convolved 
+
+  if (j.find("wnumu") != j.end()) {
+      wnumu = j["wnumu"];
+  }
+  if (j.find("wnumubar") != j.end()) {
+      wnumubar = j["wnumubar"];
+  }
+  if (j.find("wnue") != j.end()) {  
+      wnue = j["wnue"];
+  }
+
+  
   std::cout << "Flavor weights: "<< wnumu<<" "<<wnumubar<<" "<<wnue<<std::endl;
 
   // Zenodo for first microsecond
@@ -229,18 +239,6 @@ int main(int argc, char * argv[] )
   outfilename = "out/sns_diff_rates-"+std::string(jsonfile)+"-"+material+"-"+ffname+".out";
   outfile.open(outfilename);
   std::cout << outfilename <<std::endl;
-
-
-   // Array for quenched total rates... could make this a stl vec 
-   // but this is probably more efficient
-
-  const int maxiq = 20000;
-  double Er[maxiq];
-  double Eee[max_components][maxiq];
-  double dNdEee[max_components][maxiq];
-  double dNdEr[max_components][maxiq];
-  double dNdErall[maxiq]={0.};
-
 
   double M;
   double Delta;
@@ -464,6 +462,10 @@ int main(int argc, char * argv[] )
   }
   
 
+  // Set up arrays for quenched total rates... could make this a stl vec 
+   // but this is probably more efficient
+
+
 
   // Use the mass of the lightest component
   double erecmaxall = 2*kmax*kmax/(minM+2*kmax);
@@ -473,12 +475,31 @@ int main(int argc, char * argv[] )
   double erecend = recoilupperthresh > recoilthresh ?
                    std::min(erecmaxall, recoilupperthresh) :
                    erecmaxall;
-  //  double erecstep = 0.0001;
+
   double erecstep = 0.0001;
+  if (j.find("erecstep") != j.end()) {
+    erecstep = j["erecstep"];
+  }
 
-   // Now compute the differential recoil spectra
+  // Set up the recoil energy arrays
 
-     
+  int maxiq;
+  maxiq = int((erecend-erecstart)/erecstep)+1;
+
+  double* Er = new double[maxiq];
+  double** Eee = new double*[max_components];
+  double** dNdEee = new double*[max_components];
+  double** dNdEr = new double*[max_components];
+  for (int iee = 0;iee < max_components;iee++) {
+    Eee[iee] = new double[maxiq];
+    dNdEee[iee] = new double[maxiq];
+    dNdEr[iee] = new double[maxiq];
+  }
+
+  double* dNdErall = new double[maxiq];
+  
+  // Now compute the differential recoil spectra
+
     double Erec;
     double knu;
 
@@ -505,7 +526,7 @@ int main(int argc, char * argv[] )
    for (Erec=erecstart+erecstep;Erec<=erecend; Erec+=erecstep) {
 
      Er[iq] = Erec;
-
+     
      // Contributions for each component
      double diffrate_e_vec[max_components]={0.};
      double diffrate_ebar_vec[max_components]={0.};
@@ -716,7 +737,8 @@ int main(int argc, char * argv[] )
 	  chgradcorr_tau = chgradcorr_tomalak(Q,3);
 	  chgradcorr_taubar = chgradcorr_tomalak(Q,3);
 	}
-
+	
+	
 	GV_sm_wff_e= Z*(gv[0]+chgradcorr_e)*ffpvval+Nn*gv[1]*ffnvval;
 	GV_sm_wff_ebar= Z*(gv[0]+chgradcorr_ebar)*ffpvval+Nn*gv[1]*ffnvval;
 	GV_sm_wff_mu= Z*(gv[0]+chgradcorr_mu)*ffpvval+Nn*gv[1]*ffnvval;
@@ -1154,7 +1176,8 @@ int main(int argc, char * argv[] )
     for (ie=0;ie<iq;ie++) {
 
       isooutfile << Er[ie]<< "  "<<dNdEr[is][ie]<<endl;
-    
+
+      
     }
     isooutfile.close();
     v++;is++;
@@ -1586,6 +1609,12 @@ int main(int argc, char * argv[] )
     std::cout << "Total flux-averaged cross section, numubar: "<< toteventsnumubar/Ntargets/totalnumubar*1e40<<" x 10-40 cm^2"<<std::endl;
     std::cout << "Total flux-averaged cross section, numu+numubar: "<< (toteventsnumu+toteventsnumubar)/Ntargets/(totalnumu+totalnumubar)*1e40<<" x 10-40 cm^2"<<std::endl;
 
+    delete[] Er;
+    delete[] Eee;
+    delete[] dNdEee;
+    delete[] dNdEr;
+    delete[] dNdErall;
+    
   return 0;
   
 }
