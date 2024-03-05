@@ -1241,7 +1241,6 @@ int main(int argc, char * argv[] )
 	v++;is++;
       }
 
-      std::cout <<"maxeee "<<maxeee<<std::endl;
       // Retrieve the smearing function, which should have Gaussian sigma as a function of Eee
       std::string gsname = j["detectorresponse"]["gsname"];
 
