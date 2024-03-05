@@ -1232,8 +1232,7 @@ int main(int argc, char * argv[] )
 	
 	int ie;
 	for (ie=0;ie<iq;ie++) {
-	  
-	  if (Eee[is][ie]>maxeee) {maxeee = Eee[is][ie];}
+	  if (Eee[is][ie]>maxeee && dNdEee[is][ie]>0.) {maxeee = Eee[is][ie];}
 	  qisooutfile << Eee[is][ie]<< "  "<<dNdEee[is][ie]<<std::endl;
 	  _quenchedmap[is][Eee[is][ie]] = dNdEee[is][ie];
 
@@ -1242,6 +1241,7 @@ int main(int argc, char * argv[] )
 	v++;is++;
       }
 
+      std::cout <<"maxeee "<<maxeee<<std::endl;
       // Retrieve the smearing function, which should have Gaussian sigma as a function of Eee
       std::string gsname = j["detectorresponse"]["gsname"];
 
