@@ -56,7 +56,7 @@ get_time_integral.o:
 
 
 
-get_flavor_weight.o:
+get_flavor_weight.o: get_flavor_weight.cc
 	$(CXX) -o get_flavor_weight.o $(ROOTCFLAGS) $(CXXFLAGS) -c get_flavor_weight.cc
 
 csi_check: csi_check.o $(libdiffspec) 
