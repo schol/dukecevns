@@ -497,6 +497,7 @@ int main(int argc, char * argv[] )
   }
 
   double* dNdErall = new double[maxiq];
+  std::fill_n(dNdErall, maxiq, 0.0);
   
   // Now compute the differential recoil spectra
 
@@ -1183,6 +1184,12 @@ int main(int argc, char * argv[] )
     v++;is++;
   }
 
+    for (ie=0;ie<iq;ie++) {
+
+      std::cout << Er[ie]<< "  "<<dNdErall[ie]<<std::endl;
+    
+    }
+  
   // Integrated over flavor and isotope
 
     std::ofstream allisooutfile;
@@ -1194,7 +1201,7 @@ int main(int argc, char * argv[] )
     int ie;
     for (ie=0;ie<iq;ie++) {
 
-      allisooutfile << Er[ie]<< "  "<<dNdErall[ie]<<endl;
+      allisooutfile << Er[ie]<< "  "<<dNdErall[ie]<<std::endl;
     
     }
     allisooutfile.close();
@@ -1255,7 +1262,7 @@ int main(int argc, char * argv[] )
       // Fixed number of steps in quenched energy
       int  ieee = 0;
 
-      //      int neeebin = j["detectorresponse"]["neeebin"];
+      //int neeebin = j["detectorresponse"]["neeebin"];
       int neeebin = iq;
 
       double eeestep = maxeee/neeebin;
