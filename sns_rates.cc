@@ -1184,11 +1184,6 @@ int main(int argc, char * argv[] )
     v++;is++;
   }
 
-    for (ie=0;ie<iq;ie++) {
-
-      std::cout << Er[ie]<< "  "<<dNdErall[ie]<<std::endl;
-    
-    }
   
   // Integrated over flavor and isotope
 
