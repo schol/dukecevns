@@ -138,8 +138,14 @@ double mass_fraction[max_components];
   isotopes["Ge"].push_back("Ge76");
   molar_fraction["Ge"].push_back(0.0773);
 
+  isotopes["Ge70"].push_back("Ge70");
+  molar_fraction["Ge70"].push_back(1.);
+
   isotopes["Ge72"].push_back("Ge72");
   molar_fraction["Ge72"].push_back(1.);
+
+  isotopes["Ge73"].push_back("Ge73");
+  molar_fraction["Ge73"].push_back(1.);
 
   isotopes["Ge74"].push_back("Ge74");
   molar_fraction["Ge74"].push_back(1.);
