@@ -1321,6 +1321,7 @@ int main(int argc, char * argv[] )
 	    }
 	  }
 
+
 	} else {
 	  eee_eff_factor = 1;
 	}
@@ -1385,18 +1386,18 @@ int main(int argc, char * argv[] )
 	double totweff = 0.;
 	for (ieee=0;ieee<neeebin*2;ieee++) {
 
+	  eeei += eeestep;
 	  // Apply the Eee efficiency here, if requested
 	  double eee_eff_factor = 1.;
 	  if (eeei>=eethresh &&
               (eeupperthresh > eethresh ? eeei <= eeupperthresh : true)) {
 	    if (effname != "none" && eff_type == "eee"){
-	      eee_eff_factor = detresp->efficnum(eeei);	    
+	      eee_eff_factor = detresp->efficnum(eeei);
 	    }
-	    eeei += eeestep;
 	    smoutfile << eeei<<" "<<_smearedmap[eeei]*eee_eff_factor<<std::endl;
 	    totweff += _smearedmap[eeei]*eee_eff_factor*eeestep;
-	  } else {
-	    eeei += eeestep;
+	    //	  } else {
+	    //eeei += eeestep;
 	  }
 	}
 
