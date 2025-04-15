@@ -24,7 +24,7 @@ git submodule update --init
 [ROOT][] is needed to compile [dukecevns][]. The [Makefile](Makefile) included in [dukecevns][] can be used to compile [dukecevns][] on Linux and MacOS with [ROOT][] installed. For Windows users, a [Docker][] image [physino/root][] that has the latest [ROOT][] installed in [Fedora][] Linux can be used to compile [dukecevns][]. If [Docker Desktop][] has been installed and is running, open a terminal in the folder of [dukecevns][] by highlighting the address bar of the file explorer and typing `cmd` and return. In the terminal, type
 
 ```sh
-docker-compose run --rm sh
+docker compose run --rm sh
 ```
 
 Wait and let [Docker][] do its magic until you see a familiar [SHELL][] [prompt][] showing up:

@@ -29,7 +29,7 @@ class DetectorResponse
   char gspolyfilename[80];
   std::vector<double> gspolycoeff;
   double gspolyrange[2]; // Range of validity for polynomial
-  char gstype[0];
+  char gstype[80];
 
 
   // For gamma function smearing
