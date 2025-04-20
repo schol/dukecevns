@@ -10,6 +10,20 @@
 
 ///////
 
+
+double UnityFF::FFval(double Q) 
+{
+
+  double ff = 1;
+    
+  return ff;
+
+}
+
+
+
+///////
+
 void Helm::Setsval(double s) {
 
   sval = s;

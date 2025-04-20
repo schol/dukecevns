@@ -45,6 +45,15 @@ class FormFactor
 
 };
 
+class UnityFF: public FormFactor {
+
+
+ public:
+  UnityFF() : FormFactor("unityff") {}
+  double FFval(double);
+
+};
+
 class Helm: public FormFactor {
 
  protected:
@@ -57,6 +66,7 @@ class Helm: public FormFactor {
   double Getsval(); 
 
 };
+
 
 class Klein: public FormFactor {
 
