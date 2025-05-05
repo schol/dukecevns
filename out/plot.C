@@ -19,7 +19,6 @@
    can->Print("plots.pdf[");
 
    // draw plots
-   const int n = files->GetSize();
    TGraph *gr[100] = {0};
    TSystemFile *file;
    TIter next(files);
