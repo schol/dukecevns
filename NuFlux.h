@@ -82,7 +82,7 @@ class Monochromatic: public NuFlux {
  protected:
 
   int monoflavor = 1;
-  int monoenergy = 30.;
+  double monoenergy = 30.;
 
  public:
 
