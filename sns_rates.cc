@@ -144,10 +144,22 @@ int main(int argc, char * argv[] )
   //snsflux->SetFluxFilename("time_integral.dat");
   //snsflux->ReadFluxFile();
 
-    PiDAR* snsflux = new PiDAR();
+  NuFlux* snsflux = nullptr;
+  
+  if (j.find("fluxtype") != j.end()) {
+    auto* numflux = new NumericalFlux();;
+    snsflux = numflux;
+    numflux->SetFluxFilename("time_integral.dat");
+    numflux->ReadFluxFile();
+  }
+  else {
+    PiDAR* pidarflux = new PiDAR();
+    snsflux = pidarflux;
+  }  
+
   
   double kmax = snsflux->maxEnu();
-  std::cout << "kmax "<<kmax << std::endl;
+
   // Normalize flux for 19.3 m from SNS, per cm^2 per s
   //snsflux->SetNorm(5.e14/(4*M_PI*1950.*1950.));
 
@@ -631,8 +643,8 @@ int main(int argc, char * argv[] )
 
 	 double knumin = 0.5*(Erec+sqrt(Erec*Erec+2*M*Erec));
 	 double hbarc = 197.327; // MeV-fm, convert for Q in MeV for ff
-	 double Q = sqrt(2*M*Erec+Erec*Erec); // MeV
-	 //	 double Q = sqrt(2*M*Erec); // MeV
+	 //double Q = sqrt(2*M*Erec+Erec*Erec); // MeV  3-mom transfer
+	 double Q = sqrt(2*M*Erec); // MeV.  This is 4-mom transfer.  The rigght quantityy
 
 	 double qq = Q/hbarc;
 	 //    double ff2 = helmff->FFval(qq);
