@@ -597,6 +597,7 @@ int main(int argc, char * argv[] )
 	 // Minimum neutrino energy contributing to a given recoil energy
 
 	 double knumin = 0.5*(Erec+sqrt(Erec*Erec+2*M*Erec));
+
 	 double hbarc = 197.327; // MeV-fm, convert for Q in MeV for ff
 	 double Q = sqrt(2*M*Erec+Erec*Erec); // MeV
 	 //	 double Q = sqrt(2*M*Erec); // MeV
@@ -892,7 +893,8 @@ int main(int argc, char * argv[] )
 	 knu = kmax;
 	 // Dumb integral, could be more clever to make it faster
 	 //	 for (knu=knumin;knu<=kmax;knu+=knustep) {
-	  	  
+	 // Check to avoid recoils over endpoint
+	 if (knu> knumin) {
 	   drate_e_vec += diffxscnvec(knu,M,Erec)*monoflux->fluxval(knu,1,knustep);
 	   drate_ebar_vec += diffxscnvec(knu,M,Erec)*monoflux->fluxval(knu,-1,knustep);
 	   drate_mu_vec += diffxscnvec(knu,M,Erec)*monoflux->fluxval(knu,2,knustep);
@@ -927,7 +929,7 @@ int main(int argc, char * argv[] )
 	      
 	   //    std::cout << Erec << " "<<knu<<" "<<monoflux->fluxval(knu,1,knustep)<<" "<<diffrate_e_vec<<std::endl;
 
-	   //	 } // End of loop over neutrino energy contributions
+	 } // End of neutrino energy range check
 	   
 	 // Now multiply by target-dependent factors and add up this recoil energy bin
 
